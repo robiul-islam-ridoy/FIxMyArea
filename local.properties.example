@@ -1,0 +1,12 @@
+# Android SDK location (required)
+sdk.dir=/path/to/Android/Sdk
+
+# Cloudinary Configuration (required for image uploads)
+# Get these from https://cloudinary.com/console
+cloudinary.cloud.name=your_cloud_name_here
+cloudinary.upload.preset=your_upload_preset_here
+
+# Instructions:
+# 1. Copy this file to 'local.properties' (in the same directory)
+# 2. Replace the values above with your actual credentials
+# 3. Never commit local.properties to Git - it's in .gitignore for security
