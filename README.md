@@ -164,12 +164,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact 📧
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
+- GitHub: [@yourusername](https://github.com/robiul-islam-ridoy)
+- Email: robiulislamhr.bd@gmail.com
 
 ## Project Status 🚧
 
-This project is currently in active development as a university project.
+This project is currently in active development.
 
 ---
 
