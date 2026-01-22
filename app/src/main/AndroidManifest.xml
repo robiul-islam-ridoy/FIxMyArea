@@ -35,6 +35,20 @@
         </activity>
         
         <activity
+            android:name=".ui.DashboardActivity"
+            android:exported="false" />
+        
+        <activity
+            android:name=".ui.ProfileActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        
+        <activity
+            android:name=".ui.CreatePostActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        
+        <activity
             android:name=".auth.RegisterActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

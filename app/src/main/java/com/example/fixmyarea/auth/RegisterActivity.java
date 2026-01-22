@@ -21,6 +21,7 @@ import com.bumptech.glide.Glide;
 import com.example.fixmyarea.R;
 import com.example.fixmyarea.ui.MainActivity;
 import com.example.fixmyarea.firebase.FirebaseManager;
+import com.example.fixmyarea.utils.SessionManager;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -45,6 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     private FirebaseManager firebaseManager;
+    private SessionManager sessionManager;
 
     private Uri selectedImageUri = null;
     private String uploadedImageUrl = "";
@@ -56,6 +58,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Initialize Firebase Manager
         firebaseManager = FirebaseManager.getInstance();
+
+        // Initialize Session Manager
+        sessionManager = SessionManager.getInstance(this);
 
         // Initialize views
         profileImageView = findViewById(R.id.profileImageView);
@@ -127,7 +132,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void uploadImageAndRegister(String name, String email, String phone,
             String nid, String password) {
         // Upload to Cloudinary
-        com.example.fixmyarea.utils.CloudinaryUploader.uploadImage(this, selectedImageUri,
+        com.example.fixmyarea.utils.CloudinaryUploader.uploadImage(this, selectedImageUri, "profile_images",
                 new com.example.fixmyarea.utils.CloudinaryUploader.UploadCallback() {
 
                     @Override
@@ -174,6 +179,9 @@ public class RegisterActivity extends AppCompatActivity {
                                 phone,
                                 nid,
                                 profileImageUrl).addOnSuccessListener(aVoid -> {
+                                    // Save session to DataStore
+                                    sessionManager.saveSession(user.getUid(), email);
+
                                     showProgress(false);
                                     Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
 

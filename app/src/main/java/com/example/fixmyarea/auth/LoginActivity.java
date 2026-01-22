@@ -14,8 +14,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.fixmyarea.R;
-import com.example.fixmyarea.ui.MainActivity;
+import com.example.fixmyarea.ui.DashboardActivity;
 import com.example.fixmyarea.firebase.FirebaseManager;
+import com.example.fixmyarea.utils.SessionManager;
 
 /**
  * Login Activity for existing users
@@ -30,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     private FirebaseManager firebaseManager;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,9 @@ public class LoginActivity extends AppCompatActivity {
 
         // Initialize Firebase Manager
         firebaseManager = FirebaseManager.getInstance();
+
+        // Initialize Session Manager
+        sessionManager = SessionManager.getInstance(this);
 
         // Initialize views
         emailInput = findViewById(R.id.emailInput);
@@ -72,6 +77,10 @@ public class LoginActivity extends AppCompatActivity {
                     showProgress(false);
 
                     if (task.isSuccessful()) {
+                        // Save session to DataStore
+                        String userId = firebaseManager.getCurrentUser().getUid();
+                        sessionManager.saveSession(userId, email);
+
                         Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show();
                         navigateToMain();
                     } else {
@@ -156,7 +165,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void navigateToMain() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, DashboardActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

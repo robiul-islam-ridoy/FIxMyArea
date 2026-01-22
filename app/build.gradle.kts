@@ -90,4 +90,12 @@ dependencies {
     
     // HTTP client for Cloudinary uploads
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // DataStore for session management
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.datastore:datastore-preferences-rxjava3:1.0.0")
+    implementation("io.reactivex.rxjava3:rxjava:3.1.5")
+
+    //Material Components icons
+    implementation("com.google.android.material:material:1.11.0")
 }

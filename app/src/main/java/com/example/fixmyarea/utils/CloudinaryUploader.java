@@ -52,9 +52,11 @@ public class CloudinaryUploader {
      * 
      * @param context  Application context
      * @param imageUri URI of the image to upload
+     * @param folder   Cloudinary folder name (e.g., "profile_images" or
+     *                 "issue_images")
      * @param callback Upload callback
      */
-    public static void uploadImage(Context context, Uri imageUri, UploadCallback callback) {
+    public static void uploadImage(Context context, Uri imageUri, String folder, UploadCallback callback) {
         new Thread(() -> {
             try {
                 callback.onProgress(10);
@@ -78,7 +80,7 @@ public class CloudinaryUploader {
                         .addFormDataPart("file", "image.jpg",
                                 RequestBody.create(imageBytes, MediaType.parse("image/*")))
                         .addFormDataPart("upload_preset", UPLOAD_PRESET)
-                        .addFormDataPart("folder", "profile_images")
+                        .addFormDataPart("folder", folder)
                         .build();
 
                 Request request = new Request.Builder()
