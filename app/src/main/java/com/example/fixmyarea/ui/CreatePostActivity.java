@@ -10,6 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -24,6 +26,7 @@ import com.example.fixmyarea.firebase.FirebaseManager;
 import com.example.fixmyarea.utils.CloudinaryUploader;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
@@ -39,6 +42,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
     private static final String TAG = "CreatePostActivity";
     private static final int MAX_IMAGES = 5;
+    private static final int LOCATION_PICKER_REQUEST = 100;
 
     // UI Components
     private ImageButton backButton;
@@ -47,7 +51,14 @@ public class CreatePostActivity extends AppCompatActivity {
     private TextInputEditText titleInput;
     private TextInputEditText descriptionInput;
     private AutoCompleteTextView categoryInput;
+
+    // Location UI components
+    private RadioGroup locationModeGroup;
+    private TextInputLayout locationInputLayout;
     private TextInputEditText locationInput;
+    private MaterialButton pickLocationButton;
+    private TextView selectedLocationText;
+
     private MaterialButton submitButton;
     private ProgressBar progressBar;
 
@@ -58,6 +69,12 @@ public class CreatePostActivity extends AppCompatActivity {
 
     // Image Picker
     private ActivityResultLauncher<String> imagePickerLauncher;
+
+    // Location data
+    private boolean isManualLocationMode = true;
+    private double selectedLatitude = 0.0;
+    private double selectedLongitude = 0.0;
+    private String selectedAddress = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +107,14 @@ public class CreatePostActivity extends AppCompatActivity {
         titleInput = findViewById(R.id.titleInput);
         descriptionInput = findViewById(R.id.descriptionInput);
         categoryInput = findViewById(R.id.categoryInput);
+
+        // Location components
+        locationModeGroup = findViewById(R.id.locationModeGroup);
+        locationInputLayout = findViewById(R.id.locationInputLayout);
         locationInput = findViewById(R.id.locationInput);
+        pickLocationButton = findViewById(R.id.pickLocationButton);
+        selectedLocationText = findViewById(R.id.selectedLocationText);
+
         submitButton = findViewById(R.id.submitButton);
         progressBar = findViewById(R.id.progressBar);
     }
@@ -162,6 +186,23 @@ public class CreatePostActivity extends AppCompatActivity {
             }
         });
 
+        // Location mode toggle
+        locationModeGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.radioManual) {
+                isManualLocationMode = true;
+                updateLocationUI();
+            } else if (checkedId == R.id.radioAutomated) {
+                isManualLocationMode = false;
+                updateLocationUI();
+            }
+        });
+
+        // Pick location on map
+        pickLocationButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, LocationPickerActivity.class);
+            startActivityForResult(intent, LOCATION_PICKER_REQUEST);
+        });
+
         submitButton.setOnClickListener(v -> validateAndSubmit());
     }
 
@@ -172,6 +213,35 @@ public class CreatePostActivity extends AppCompatActivity {
         } else {
             addImageButton.setEnabled(true);
             addImageButton.setText("Add Images (" + selectedImages.size() + "/" + MAX_IMAGES + ")");
+        }
+    }
+
+    private void updateLocationUI() {
+        if (isManualLocationMode) {
+            // Show manual input, hide map button and preview
+            locationInputLayout.setVisibility(View.VISIBLE);
+            pickLocationButton.setVisibility(View.GONE);
+            selectedLocationText.setVisibility(View.GONE);
+
+            // Clear automated location data
+            selectedLatitude = 0.0;
+            selectedLongitude = 0.0;
+            selectedAddress = "";
+        } else {
+            // Show map button, hide manual input
+            locationInputLayout.setVisibility(View.GONE);
+            pickLocationButton.setVisibility(View.VISIBLE);
+
+            // Clear manual input
+            if (locationInput != null && locationInput.getText() != null) {
+                locationInput.getText().clear();
+            }
+
+            // Show preview if location was selected
+            if (!selectedAddress.isEmpty()) {
+                selectedLocationText.setText(selectedAddress);
+                selectedLocationText.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -206,10 +276,21 @@ public class CreatePostActivity extends AppCompatActivity {
             return;
         }
 
-        if (TextUtils.isEmpty(location)) {
-            locationInput.setError("Location is required");
-            locationInput.requestFocus();
-            return;
+        // Validate location based on mode
+        if (isManualLocationMode) {
+            if (TextUtils.isEmpty(location)) {
+                locationInput.setError("Location is required");
+                locationInput.requestFocus();
+                return;
+            }
+        } else {
+            // Automated mode - check if location was picked
+            if (selectedAddress.isEmpty() || selectedLatitude == 0.0 || selectedLongitude == 0.0) {
+                Toast.makeText(this, "Please pick a location on the map", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // Use selected address from map
+            location = selectedAddress;
         }
 
         // All validation passed, submit the post
@@ -244,6 +325,13 @@ public class CreatePostActivity extends AppCompatActivity {
             postData.put(FirebaseConstants.FIELD_ISSUE_DESCRIPTION, description);
             postData.put(FirebaseConstants.FIELD_ISSUE_CATEGORY, category.toLowerCase());
             postData.put(FirebaseConstants.FIELD_ISSUE_LOCATION, location);
+
+            // Add coordinates if using automated mode
+            if (!isManualLocationMode && selectedLatitude != 0.0 && selectedLongitude != 0.0) {
+                postData.put(FirebaseConstants.FIELD_ISSUE_LATITUDE, selectedLatitude);
+                postData.put(FirebaseConstants.FIELD_ISSUE_LONGITUDE, selectedLongitude);
+            }
+
             postData.put(FirebaseConstants.FIELD_ISSUE_IMAGE_URL, imageUrls); // Store as array
             postData.put(FirebaseConstants.FIELD_ISSUE_REPORTER_ID, userId);
             postData.put(FirebaseConstants.FIELD_ISSUE_STATUS, FirebaseConstants.STATUS_PENDING);
@@ -323,6 +411,23 @@ public class CreatePostActivity extends AppCompatActivity {
             submitButton.setText("Uploading...");
         } else {
             submitButton.setText("Submit Report");
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == LOCATION_PICKER_REQUEST && resultCode == RESULT_OK && data != null) {
+            selectedLatitude = data.getDoubleExtra("latitude", 0.0);
+            selectedLongitude = data.getDoubleExtra("longitude", 0.0);
+            selectedAddress = data.getStringExtra("address");
+
+            if (selectedAddress != null && !selectedAddress.isEmpty()) {
+                selectedLocationText.setText(selectedAddress);
+                selectedLocationText.setVisibility(View.VISIBLE);
+                Toast.makeText(this, "Location selected", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

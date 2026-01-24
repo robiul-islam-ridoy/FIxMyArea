@@ -27,6 +27,8 @@ public class FirebaseConstants {
     public static final String FIELD_ISSUE_CATEGORY = "category";
     public static final String FIELD_ISSUE_STATUS = "status";
     public static final String FIELD_ISSUE_LOCATION = "location";
+    public static final String FIELD_ISSUE_LATITUDE = "latitude";
+    public static final String FIELD_ISSUE_LONGITUDE = "longitude";
     public static final String FIELD_ISSUE_IMAGE_URL = "imageUrl";
     public static final String FIELD_ISSUE_REPORTER_ID = "reporterId";
     public static final String FIELD_ISSUE_TIMESTAMP = "timestamp";

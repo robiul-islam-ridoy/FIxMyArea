@@ -118,6 +118,13 @@ public class FirebaseManager {
     }
 
     /**
+     * Get Firestore instance for complex queries
+     */
+    public FirebaseFirestore getFirestore() {
+        return firestore;
+    }
+
+    /**
      * Update a document
      */
     public Task<Void> updateDocument(String collection, String documentId, Map<String, Object> updates) {

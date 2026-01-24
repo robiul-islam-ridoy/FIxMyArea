@@ -55,48 +55,55 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- Main Dashboard Content -->
-        <ScrollView
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:layout_height="match_parent">
 
-            <LinearLayout
+            <!-- Posts RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/postsRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:clipToPadding="false" />
 
-                <!-- Welcome Message -->
+            <!-- Loading Progress Bar -->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/emptyState"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Welcome to FixMyArea!"
-                    android:textSize="20sp"
+                    android:text="No posts yet"
+                    android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="#333333"
+                    android:textColor="#999999"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Report issues in your community and track their resolution."
+                    android:text="Be the first to report an issue!"
                     android:textSize="14sp"
-                    android:textColor="#666666"
-                    android:layout_marginBottom="24dp" />
-
-                <!-- Dashboard Cards/Actions will be added here -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Dashboard content coming soon..."
-                    android:textSize="16sp"
-                    android:textColor="#999999"
-                    android:gravity="center"
-                    android:padding="32dp" />
-
+                    android:textColor="#BBBBBB"
+                    android:gravity="center" />
             </LinearLayout>
 
-        </ScrollView>
+        </FrameLayout>
 
     </LinearLayout>
 

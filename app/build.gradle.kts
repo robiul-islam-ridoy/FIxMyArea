@@ -98,4 +98,10 @@ dependencies {
 
     //Material Components icons
     implementation("com.google.android.material:material:1.11.0")
+    
+    // OpenStreetMap for Android (osmdroid)
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
+    
+    // Google Play Services Location for GPS
+    implementation("com.google.android.gms:play-services-location:21.1.0")
 }

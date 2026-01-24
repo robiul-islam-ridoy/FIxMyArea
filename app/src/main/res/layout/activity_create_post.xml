@@ -181,10 +181,36 @@
                 android:textColor="#333333"
                 android:layout_marginBottom="8dp" />
 
-            <com.google.android.material.textfield.TextInputLayout
+            <!-- Location Mode Selection -->
+            <RadioGroup
+                android:id="@+id/locationModeGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <RadioButton
+                    android:id="@+id/radioManual"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Manual Entry"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/radioAutomated"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Use GPS/Map" />
+            </RadioGroup>
+
+            <!-- Manual Location Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/locationInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 app:boxBackgroundMode="outline">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -195,6 +221,32 @@
                     android:inputType="textCapSentences"
                     android:maxLines="2" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Automated Location: Pick on Map Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pickLocationButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pick Location on Map"
+                android:textColor="@android:color/white"
+                app:icon="@drawable/ic_location_pin"
+                app:iconGravity="textStart"
+                app:iconTint="@android:color/white"
+                app:backgroundTint="#4CAF50"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Selected Location Preview -->
+            <TextView
+                android:id="@+id/selectedLocationText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:background="#F5F5F5"
+                android:textColor="#666666"
+                android:textSize="13sp"
+                android:visibility="gone"
+                android:layout_marginBottom="24dp" />
 
             <!-- Submit Button -->
             <com.google.android.material.button.MaterialButton
