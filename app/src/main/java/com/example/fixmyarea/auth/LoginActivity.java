@@ -74,16 +74,36 @@ public class LoginActivity extends AppCompatActivity {
         // Sign in user
         firebaseManager.signInWithEmail(email, password)
                 .addOnCompleteListener(this, task -> {
-                    showProgress(false);
-
                     if (task.isSuccessful()) {
-                        // Save session to DataStore
                         String userId = firebaseManager.getCurrentUser().getUid();
-                        sessionManager.saveSession(userId, email);
 
-                        Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show();
-                        navigateToMain();
+                        // Fetch user role from Firestore
+                        firebaseManager.getUserRole(userId).addOnCompleteListener(roleTask -> {
+                            showProgress(false);
+
+                            if (roleTask.isSuccessful()) {
+                                String role = roleTask.getResult();
+
+                                // Save session with role
+                                sessionManager.saveSession(userId, email, role);
+
+                                Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show();
+
+                                // Route based on role
+                                if ("admin".equalsIgnoreCase(role)) {
+                                    navigateToAdminDashboard();
+                                } else {
+                                    navigateToMain();
+                                }
+                            } else {
+                                // If role fetch fails, default to user role
+                                sessionManager.saveSession(userId, email, "user");
+                                Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show();
+                                navigateToMain();
+                            }
+                        });
                     } else {
+                        showProgress(false);
                         String error = task.getException() != null ? task.getException().getMessage() : "Login failed";
                         Toast.makeText(this, error, Toast.LENGTH_LONG).show();
                     }
@@ -166,6 +186,13 @@ public class LoginActivity extends AppCompatActivity {
 
     private void navigateToMain() {
         Intent intent = new Intent(this, DashboardActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void navigateToAdminDashboard() {
+        Intent intent = new Intent(this, com.example.fixmyarea.ui.admin.AdminDashboardActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

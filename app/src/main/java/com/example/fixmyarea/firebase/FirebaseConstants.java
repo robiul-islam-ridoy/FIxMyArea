@@ -18,7 +18,12 @@ public class FirebaseConstants {
     public static final String FIELD_USER_PHONE = "phone";
     public static final String FIELD_USER_NID = "nid"; // National ID / Student ID
     public static final String FIELD_USER_PROFILE_IMAGE = "profileImageUrl"; // Profile image URL
+    public static final String FIELD_USER_ROLE = "role"; // User role (admin/user)
     public static final String FIELD_USER_CREATED_AT = "createdAt";
+
+    // User Roles
+    public static final String ROLE_ADMIN = "admin";
+    public static final String ROLE_USER = "user";
 
     // Firestore Field Names - Issues
     public static final String FIELD_ISSUE_ID = "issueId";
@@ -40,6 +45,7 @@ public class FirebaseConstants {
 
     // Issue Status
     public static final String STATUS_PENDING = "pending";
+    public static final String STATUS_APPROVED = "approved";
     public static final String STATUS_IN_PROGRESS = "in_progress";
     public static final String STATUS_RESOLVED = "resolved";
     public static final String STATUS_REJECTED = "rejected";

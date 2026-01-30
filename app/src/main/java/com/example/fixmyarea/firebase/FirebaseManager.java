@@ -190,6 +190,7 @@ public class FirebaseManager {
         userProfile.put(FirebaseConstants.FIELD_USER_PHONE, phone);
         userProfile.put(FirebaseConstants.FIELD_USER_NID, nid);
         userProfile.put(FirebaseConstants.FIELD_USER_PROFILE_IMAGE, profileImageUrl);
+        userProfile.put(FirebaseConstants.FIELD_USER_ROLE, FirebaseConstants.ROLE_USER); // Default role
         userProfile.put(FirebaseConstants.FIELD_USER_CREATED_AT, System.currentTimeMillis());
 
         return addDocument(FirebaseConstants.COLLECTION_USERS, userId, userProfile);
@@ -232,5 +233,158 @@ public class FirebaseManager {
      */
     public Task<QuerySnapshot> getIssuesByCategory(String category) {
         return queryDocuments(FirebaseConstants.COLLECTION_ISSUES, FirebaseConstants.FIELD_ISSUE_CATEGORY, category);
+    }
+
+    // ==================== ADMIN METHODS ====================
+
+    /**
+     * Get user role from Firestore
+     */
+    public Task<String> getUserRole(String userId) {
+        return getDocument(FirebaseConstants.COLLECTION_USERS, userId)
+                .continueWith(task -> {
+                    if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
+                        String role = task.getResult().getString(FirebaseConstants.FIELD_USER_ROLE);
+                        return role != null ? role : FirebaseConstants.ROLE_USER;
+                    }
+                    return FirebaseConstants.ROLE_USER;
+                });
+    }
+
+    /**
+     * Get all users (Admin only)
+     */
+    public Task<QuerySnapshot> getAllUsers() {
+        return getAllDocuments(FirebaseConstants.COLLECTION_USERS);
+    }
+
+    /**
+     * Create a new user account by admin
+     */
+    public Task<Void> createUserByAdmin(String userId, String name, String email, String phone,
+            String nid, String profileImageUrl, String role) {
+        Map<String, Object> userProfile = new HashMap<>();
+        userProfile.put(FirebaseConstants.FIELD_USER_ID, userId);
+        userProfile.put(FirebaseConstants.FIELD_USER_NAME, name);
+        userProfile.put(FirebaseConstants.FIELD_USER_EMAIL, email);
+        userProfile.put(FirebaseConstants.FIELD_USER_PHONE, phone);
+        userProfile.put(FirebaseConstants.FIELD_USER_NID, nid);
+        userProfile.put(FirebaseConstants.FIELD_USER_PROFILE_IMAGE, profileImageUrl);
+        userProfile.put(FirebaseConstants.FIELD_USER_ROLE, role);
+        userProfile.put(FirebaseConstants.FIELD_USER_CREATED_AT, System.currentTimeMillis());
+
+        return addDocument(FirebaseConstants.COLLECTION_USERS, userId, userProfile);
+    }
+
+    /**
+     * Update user information (Admin only)
+     */
+    public Task<Void> updateUser(String userId, Map<String, Object> updates) {
+        return updateDocument(FirebaseConstants.COLLECTION_USERS, userId, updates);
+    }
+
+    /**
+     * Delete user data from Firestore (Admin only)
+     * Note: Firebase Auth account must be deleted separately
+     */
+    public Task<Void> deleteUserData(String userId) {
+        return deleteDocument(FirebaseConstants.COLLECTION_USERS, userId);
+    }
+
+    /**
+     * Update issue status (Admin - for approve/reject)
+     */
+    public Task<Void> updateIssueStatus(String issueId, String newStatus) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put(FirebaseConstants.FIELD_ISSUE_STATUS, newStatus);
+        updates.put("lastUpdated", System.currentTimeMillis());
+        return updateDocument(FirebaseConstants.COLLECTION_ISSUES, issueId, updates);
+    }
+
+    /**
+     * Get system statistics (Admin only)
+     * Returns a map with counts of users, issues, and status breakdowns
+     */
+    public Task<Map<String, Object>> getSystemStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+
+        // Get all users count
+        Task<QuerySnapshot> usersTask = getAllUsers();
+        // Get all issues
+        Task<QuerySnapshot> issuesTask = getAllDocuments(FirebaseConstants.COLLECTION_ISSUES);
+
+        return com.google.android.gms.tasks.Tasks.whenAllSuccess(usersTask, issuesTask)
+                .continueWith(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot usersSnapshot = (QuerySnapshot) task.getResult().get(0);
+                        QuerySnapshot issuesSnapshot = (QuerySnapshot) task.getResult().get(1);
+
+                        stats.put("totalUsers", usersSnapshot.size());
+                        stats.put("totalIssues", issuesSnapshot.size());
+
+                        // Count issues by status
+                        int pending = 0, approved = 0, inProgress = 0, resolved = 0, rejected = 0;
+                        for (com.google.firebase.firestore.DocumentSnapshot doc : issuesSnapshot.getDocuments()) {
+                            String status = doc.getString(FirebaseConstants.FIELD_ISSUE_STATUS);
+                            if (status != null) {
+                                switch (status) {
+                                    case FirebaseConstants.STATUS_PENDING:
+                                        pending++;
+                                        break;
+                                    case FirebaseConstants.STATUS_APPROVED:
+                                        approved++;
+                                        break;
+                                    case FirebaseConstants.STATUS_IN_PROGRESS:
+                                        inProgress++;
+                                        break;
+                                    case FirebaseConstants.STATUS_RESOLVED:
+                                        resolved++;
+                                        break;
+                                    case FirebaseConstants.STATUS_REJECTED:
+                                        rejected++;
+                                        break;
+                                }
+                            }
+                        }
+
+                        stats.put("pendingIssues", pending);
+                        stats.put("approvedIssues", approved);
+                        stats.put("inProgressIssues", inProgress);
+                        stats.put("resolvedIssues", resolved);
+                        stats.put("rejectedIssues", rejected);
+
+                        // Count by category
+                        int road = 0, water = 0, electricity = 0, sanitation = 0, other = 0;
+                        for (com.google.firebase.firestore.DocumentSnapshot doc : issuesSnapshot.getDocuments()) {
+                            String category = doc.getString(FirebaseConstants.FIELD_ISSUE_CATEGORY);
+                            if (category != null) {
+                                switch (category) {
+                                    case FirebaseConstants.CATEGORY_ROAD:
+                                        road++;
+                                        break;
+                                    case FirebaseConstants.CATEGORY_WATER:
+                                        water++;
+                                        break;
+                                    case FirebaseConstants.CATEGORY_ELECTRICITY:
+                                        electricity++;
+                                        break;
+                                    case FirebaseConstants.CATEGORY_SANITATION:
+                                        sanitation++;
+                                        break;
+                                    case FirebaseConstants.CATEGORY_OTHER:
+                                        other++;
+                                        break;
+                                }
+                            }
+                        }
+
+                        stats.put("roadIssues", road);
+                        stats.put("waterIssues", water);
+                        stats.put("electricityIssues", electricity);
+                        stats.put("sanitationIssues", sanitation);
+                        stats.put("otherIssues", other);
+                    }
+                    return stats;
+                });
     }
 }

@@ -20,6 +20,7 @@ public class SessionManager {
     // Preference keys
     private static final Preferences.Key<String> KEY_USER_ID = PreferencesKeys.stringKey("user_id");
     private static final Preferences.Key<String> KEY_USER_EMAIL = PreferencesKeys.stringKey("user_email");
+    private static final Preferences.Key<String> KEY_USER_ROLE = PreferencesKeys.stringKey("user_role");
     private static final Preferences.Key<Long> KEY_LOGIN_TIMESTAMP = PreferencesKeys.longKey("login_timestamp");
     private static final Preferences.Key<Boolean> KEY_IS_LOGGED_IN = PreferencesKeys.booleanKey("is_logged_in");
 
@@ -42,16 +43,28 @@ public class SessionManager {
      * 
      * @param userId Firebase user ID
      * @param email  User email
+     * @param role   User role (admin/user)
      */
-    public void saveSession(String userId, String email) {
+    public void saveSession(String userId, String email, String role) {
         dataStore.updateDataAsync(prefsIn -> {
             MutablePreferences mutablePreferences = prefsIn.toMutablePreferences();
             mutablePreferences.set(KEY_USER_ID, userId);
             mutablePreferences.set(KEY_USER_EMAIL, email);
+            mutablePreferences.set(KEY_USER_ROLE, role);
             mutablePreferences.set(KEY_LOGIN_TIMESTAMP, System.currentTimeMillis());
             mutablePreferences.set(KEY_IS_LOGGED_IN, true);
             return Single.just(mutablePreferences);
         }).blockingSubscribe();
+    }
+
+    /**
+     * Save user session data (backward compatibility without role)
+     * 
+     * @param userId Firebase user ID
+     * @param email  User email
+     */
+    public void saveSession(String userId, String email) {
+        saveSession(userId, email, "user");
     }
 
     /**
@@ -93,6 +106,25 @@ public class SessionManager {
     }
 
     /**
+     * Get user role from session
+     * 
+     * @return User role or "user" if not set
+     */
+    public String getUserRole() {
+        String role = dataStore.data().map(prefs -> prefs.get(KEY_USER_ROLE)).blockingFirst();
+        return role != null ? role : "user";
+    }
+
+    /**
+     * Check if current user is admin
+     * 
+     * @return true if user role is admin
+     */
+    public boolean isAdmin() {
+        return "admin".equalsIgnoreCase(getUserRole());
+    }
+
+    /**
      * Clear all session data (logout)
      */
     public void clearSession() {
@@ -109,12 +141,14 @@ public class SessionManager {
     public static class SessionData {
         private final String userId;
         private final String email;
+        private final String role;
         private final long loginTimestamp;
         private final boolean isLoggedIn;
 
-        public SessionData(String userId, String email, long loginTimestamp, boolean isLoggedIn) {
+        public SessionData(String userId, String email, String role, long loginTimestamp, boolean isLoggedIn) {
             this.userId = userId;
             this.email = email;
+            this.role = role;
             this.loginTimestamp = loginTimestamp;
             this.isLoggedIn = isLoggedIn;
         }
@@ -125,6 +159,14 @@ public class SessionManager {
 
         public String getEmail() {
             return email;
+        }
+
+        public String getRole() {
+            return role;
+        }
+
+        public boolean isAdmin() {
+            return "admin".equalsIgnoreCase(role);
         }
 
         public long getLoginTimestamp() {
@@ -145,12 +187,14 @@ public class SessionManager {
         return dataStore.data().map(prefs -> {
             String userId = prefs.get(KEY_USER_ID);
             String email = prefs.get(KEY_USER_EMAIL);
+            String role = prefs.get(KEY_USER_ROLE);
             Long timestamp = prefs.get(KEY_LOGIN_TIMESTAMP);
             Boolean isLoggedIn = prefs.get(KEY_IS_LOGGED_IN);
 
             return new SessionData(
                     userId,
                     email,
+                    role != null ? role : "user",
                     timestamp != null ? timestamp : 0L,
                     isLoggedIn != null && isLoggedIn);
         }).blockingFirst();

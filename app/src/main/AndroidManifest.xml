@@ -65,6 +65,24 @@
             android:name=".ui.PostDetailActivity"
             android:exported="false" />
         
+        <!-- Admin Activities -->
+        <activity
+            android:name=".ui.admin.AdminDashboardActivity"
+            android:exported="false" />
+        
+        <activity
+            android:name=".ui.admin.ManageUsersActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        
+        <activity
+            android:name=".ui.admin.ManageIssuesActivity"
+            android:exported="false" />
+        
+        <activity
+            android:name=".ui.admin.AnalyticsActivity"
+            android:exported="false" />
+        
         <activity
             android:name=".auth.RegisterActivity"
             android:exported="false"
