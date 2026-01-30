@@ -88,10 +88,16 @@ public class AdminIssueAdapter extends RecyclerView.Adapter<AdminIssueAdapter.Is
             issueCategory.setText(issue.getCategory());
 
             // Load issue image
-            if (issue.getFirstImageUrl() != null) {
+            String imageUrl = issue.getFirstImageUrl();
+            if (imageUrl != null && !imageUrl.isEmpty()) {
                 Glide.with(itemView.getContext())
-                        .load(issue.getFirstImageUrl())
+                        .load(imageUrl)
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .centerCrop()
                         .into(issueImage);
+            } else {
+                issueImage.setImageResource(R.drawable.ic_launcher_foreground);
             }
 
             // Show/hide action buttons based on status

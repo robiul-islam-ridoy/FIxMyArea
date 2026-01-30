@@ -105,11 +105,43 @@ public class ManageIssuesActivity extends AppCompatActivity implements AdminIssu
             issueList.clear();
 
             for (DocumentSnapshot doc : result.getDocuments()) {
-                Post post = doc.toObject(Post.class);
-                if (post != null) {
-                    post.setPostId(doc.getId());
-                    issueList.add(post);
+                Post post = new Post();
+                post.setPostId(doc.getId());
+                post.setTitle(doc.getString(FirebaseConstants.FIELD_ISSUE_TITLE));
+                post.setDescription(doc.getString(FirebaseConstants.FIELD_ISSUE_DESCRIPTION));
+                post.setCategory(doc.getString(FirebaseConstants.FIELD_ISSUE_CATEGORY));
+                post.setStatus(doc.getString(FirebaseConstants.FIELD_ISSUE_STATUS));
+                post.setLocation(doc.getString(FirebaseConstants.FIELD_ISSUE_LOCATION));
+
+                // Get coordinates if available
+                if (doc.contains(FirebaseConstants.FIELD_ISSUE_LATITUDE)) {
+                    post.setLatitude(doc.getDouble(FirebaseConstants.FIELD_ISSUE_LATITUDE));
                 }
+                if (doc.contains(FirebaseConstants.FIELD_ISSUE_LONGITUDE)) {
+                    post.setLongitude(doc.getDouble(FirebaseConstants.FIELD_ISSUE_LONGITUDE));
+                }
+
+                // Get images - this is the key fix for admin panel
+                Object imageUrlObj = doc.get(FirebaseConstants.FIELD_ISSUE_IMAGE_URL);
+                if (imageUrlObj instanceof List) {
+                    post.setImageUrls((List<String>) imageUrlObj);
+                }
+
+                post.setReporterId(doc.getString(FirebaseConstants.FIELD_ISSUE_REPORTER_ID));
+
+                // Get timestamp
+                Long timestamp = doc.getLong(FirebaseConstants.FIELD_ISSUE_TIMESTAMP);
+                if (timestamp != null) {
+                    post.setTimestamp(timestamp);
+                }
+
+                // Get upvotes
+                Long upvotes = doc.getLong(FirebaseConstants.FIELD_ISSUE_UPVOTES);
+                if (upvotes != null) {
+                    post.setUpvotes(upvotes.intValue());
+                }
+
+                issueList.add(post);
             }
 
             issueAdapter.notifyDataSetChanged();

@@ -10,9 +10,12 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.fixmyarea.R;
 import com.example.fixmyarea.adapters.PostImageAdapter;
+import com.example.fixmyarea.firebase.FirebaseConstants;
 import com.example.fixmyarea.firebase.FirebaseManager;
 import com.example.fixmyarea.models.Post;
 import com.google.android.material.chip.Chip;
+
+import java.util.List;
 
 /**
  * Activity to display full post details
@@ -114,11 +117,43 @@ public class PostDetailActivity extends AppCompatActivity {
         firebaseManager.getDocument("issues", postId)
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        post = documentSnapshot.toObject(Post.class);
-                        if (post != null) {
-                            post.setPostId(documentSnapshot.getId());
-                            displayPost();
+                        post = new Post();
+                        post.setPostId(documentSnapshot.getId());
+                        post.setTitle(documentSnapshot.getString(FirebaseConstants.FIELD_ISSUE_TITLE));
+                        post.setDescription(documentSnapshot.getString(FirebaseConstants.FIELD_ISSUE_DESCRIPTION));
+                        post.setCategory(documentSnapshot.getString(FirebaseConstants.FIELD_ISSUE_CATEGORY));
+                        post.setStatus(documentSnapshot.getString(FirebaseConstants.FIELD_ISSUE_STATUS));
+                        post.setLocation(documentSnapshot.getString(FirebaseConstants.FIELD_ISSUE_LOCATION));
+
+                        // Get coordinates if available
+                        if (documentSnapshot.contains(FirebaseConstants.FIELD_ISSUE_LATITUDE)) {
+                            post.setLatitude(documentSnapshot.getDouble(FirebaseConstants.FIELD_ISSUE_LATITUDE));
                         }
+                        if (documentSnapshot.contains(FirebaseConstants.FIELD_ISSUE_LONGITUDE)) {
+                            post.setLongitude(documentSnapshot.getDouble(FirebaseConstants.FIELD_ISSUE_LONGITUDE));
+                        }
+
+                        // Get images - this is the key fix
+                        Object imageUrlObj = documentSnapshot.get(FirebaseConstants.FIELD_ISSUE_IMAGE_URL);
+                        if (imageUrlObj instanceof List) {
+                            post.setImageUrls((List<String>) imageUrlObj);
+                        }
+
+                        post.setReporterId(documentSnapshot.getString(FirebaseConstants.FIELD_ISSUE_REPORTER_ID));
+
+                        // Get timestamp
+                        Long timestamp = documentSnapshot.getLong(FirebaseConstants.FIELD_ISSUE_TIMESTAMP);
+                        if (timestamp != null) {
+                            post.setTimestamp(timestamp);
+                        }
+
+                        // Get upvotes
+                        Long upvotes = documentSnapshot.getLong(FirebaseConstants.FIELD_ISSUE_UPVOTES);
+                        if (upvotes != null) {
+                            post.setUpvotes(upvotes.intValue());
+                        }
+
+                        displayPost();
                     }
                 })
                 .addOnFailureListener(e -> {
