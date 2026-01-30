@@ -10,6 +10,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.fixmyarea.R;
 import com.example.fixmyarea.adapters.PostImageAdapter;
+import com.example.fixmyarea.firebase.FirebaseManager;
 import com.example.fixmyarea.models.Post;
 import com.google.android.material.chip.Chip;
 
@@ -43,16 +44,20 @@ public class PostDetailActivity extends AppCompatActivity {
 
     private PostImageAdapter imageAdapter;
     private Post post;
+    private FirebaseManager firebaseManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_detail);
 
+        // Initialize Firebase
+        firebaseManager = FirebaseManager.getInstance();
+
         // Initialize views
         initializeViews();
 
-        // Load post data from intent
+        // Load post data from intent or Firestore
         loadPostData();
 
         // Setup listeners
@@ -77,7 +82,15 @@ public class PostDetailActivity extends AppCompatActivity {
     }
 
     private void loadPostData() {
-        // Create post object from intent extras
+        // Check if we only have postId (from admin dashboard)
+        String postId = getIntent().getStringExtra("postId");
+        if (postId != null && !getIntent().hasExtra(EXTRA_POST_TITLE)) {
+            // Load from Firestore
+            loadPostFromFirestore(postId);
+            return;
+        }
+
+        // Create post object from intent extras (legacy method)
         post = new Post();
         post.setPostId(getIntent().getStringExtra(EXTRA_POST_ID));
         post.setTitle(getIntent().getStringExtra(EXTRA_POST_TITLE));
@@ -95,6 +108,23 @@ public class PostDetailActivity extends AppCompatActivity {
 
         // Display post data
         displayPost();
+    }
+
+    private void loadPostFromFirestore(String postId) {
+        firebaseManager.getDocument("issues", postId)
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        post = documentSnapshot.toObject(Post.class);
+                        if (post != null) {
+                            post.setPostId(documentSnapshot.getId());
+                            displayPost();
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle error - maybe show a toast
+                    finish();
+                });
     }
 
     private void displayPost() {

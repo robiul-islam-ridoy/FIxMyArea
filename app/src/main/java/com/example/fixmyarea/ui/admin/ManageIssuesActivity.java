@@ -1,5 +1,6 @@
 package com.example.fixmyarea.ui.admin;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.example.fixmyarea.adapters.AdminIssueAdapter;
 import com.example.fixmyarea.firebase.FirebaseConstants;
 import com.example.fixmyarea.firebase.FirebaseManager;
 import com.example.fixmyarea.models.Post;
+import com.example.fixmyarea.ui.PostDetailActivity;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -131,6 +133,19 @@ public class ManageIssuesActivity extends AppCompatActivity implements AdminIssu
     @Override
     public void onRejectIssue(Post issue) {
         showStatusChangeDialog(issue, "Reject Issue", FirebaseConstants.STATUS_REJECTED);
+    }
+
+    @Override
+    public void onMarkAsDone(Post issue) {
+        showStatusChangeDialog(issue, "Mark as Done", FirebaseConstants.STATUS_RESOLVED);
+    }
+
+    @Override
+    public void onIssueClick(Post issue) {
+        // Open post detail activity
+        Intent intent = new Intent(this, PostDetailActivity.class);
+        intent.putExtra("postId", issue.getPostId());
+        startActivity(intent);
     }
 
     private void showStatusChangeDialog(Post issue, String title, String newStatus) {

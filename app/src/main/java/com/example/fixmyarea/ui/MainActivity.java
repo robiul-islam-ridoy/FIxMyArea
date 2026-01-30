@@ -6,7 +6,9 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.fixmyarea.auth.LoginActivity;
+import com.example.fixmyarea.firebase.FirebaseConstants;
 import com.example.fixmyarea.firebase.FirebaseManager;
+import com.example.fixmyarea.ui.admin.AdminDashboardActivity;
 import com.example.fixmyarea.utils.SessionManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,8 +31,18 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            // User is logged in, redirect to dashboard
-            Intent intent = new Intent(this, DashboardActivity.class);
+            // User is logged in, check role and redirect accordingly
+            String userRole = sessionManager.getUserRole();
+            Intent intent;
+
+            if (FirebaseConstants.ROLE_ADMIN.equalsIgnoreCase(userRole)) {
+                // Admin user - redirect to admin dashboard
+                intent = new Intent(this, AdminDashboardActivity.class);
+            } else {
+                // Regular user - redirect to user dashboard
+                intent = new Intent(this, DashboardActivity.class);
+            }
+
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();

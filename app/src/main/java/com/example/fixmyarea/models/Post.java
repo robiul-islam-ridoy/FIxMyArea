@@ -18,6 +18,7 @@ public class Post {
     private String reporterId;
     private long timestamp;
     private int upvotes;
+    private long lastUpdated; // For Firestore compatibility
 
     // Reporter info (optional, can be loaded separately)
     private String reporterName;
@@ -137,6 +138,14 @@ public class Post {
 
     public void setUpvotes(int upvotes) {
         this.upvotes = upvotes;
+    }
+
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(long lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 
     public String getReporterName() {

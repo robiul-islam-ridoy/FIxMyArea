@@ -29,6 +29,10 @@ public class AdminIssueAdapter extends RecyclerView.Adapter<AdminIssueAdapter.Is
         void onApproveIssue(Post issue);
 
         void onRejectIssue(Post issue);
+
+        void onMarkAsDone(Post issue);
+
+        void onIssueClick(Post issue);
     }
 
     public AdminIssueAdapter(List<Post> issueList, IssueActionListener listener) {
@@ -63,6 +67,7 @@ public class AdminIssueAdapter extends RecyclerView.Adapter<AdminIssueAdapter.Is
         private final TextView issueCategory;
         private final Button btnApprove;
         private final Button btnReject;
+        private final Button btnDone;
 
         public IssueViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -73,6 +78,7 @@ public class AdminIssueAdapter extends RecyclerView.Adapter<AdminIssueAdapter.Is
             issueCategory = itemView.findViewById(R.id.issueCategory);
             btnApprove = itemView.findViewById(R.id.btnApprove);
             btnReject = itemView.findViewById(R.id.btnReject);
+            btnDone = itemView.findViewById(R.id.btnDone);
         }
 
         public void bind(Post issue, IssueActionListener listener) {
@@ -92,14 +98,25 @@ public class AdminIssueAdapter extends RecyclerView.Adapter<AdminIssueAdapter.Is
             if (FirebaseConstants.STATUS_PENDING.equals(issue.getStatus())) {
                 btnApprove.setVisibility(View.VISIBLE);
                 btnReject.setVisibility(View.VISIBLE);
+                btnDone.setVisibility(View.GONE);
+            } else if (FirebaseConstants.STATUS_APPROVED.equals(issue.getStatus()) ||
+                    FirebaseConstants.STATUS_IN_PROGRESS.equals(issue.getStatus())) {
+                btnApprove.setVisibility(View.GONE);
+                btnReject.setVisibility(View.GONE);
+                btnDone.setVisibility(View.VISIBLE);
             } else {
                 btnApprove.setVisibility(View.GONE);
                 btnReject.setVisibility(View.GONE);
+                btnDone.setVisibility(View.GONE);
             }
 
-            // Set click listeners
+            // Set click listeners for buttons
             btnApprove.setOnClickListener(v -> listener.onApproveIssue(issue));
             btnReject.setOnClickListener(v -> listener.onRejectIssue(issue));
+            btnDone.setOnClickListener(v -> listener.onMarkAsDone(issue));
+
+            // Set click listener for the entire card
+            itemView.setOnClickListener(v -> listener.onIssueClick(issue));
         }
     }
 }
