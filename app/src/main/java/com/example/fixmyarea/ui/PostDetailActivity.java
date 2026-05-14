@@ -15,6 +15,7 @@ import com.example.fixmyarea.firebase.FirebaseManager;
 import com.example.fixmyarea.models.Post;
 import com.google.android.material.chip.Chip;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,7 +44,8 @@ public class PostDetailActivity extends AppCompatActivity {
     private TextView postDescription;
     private TextView postLocation;
     private TextView postTime;
-    private TextView upvotesCount;
+    private TextView tvLikeCountDetail;
+    private TextView tvDislikeCountDetail;
 
     private PostImageAdapter imageAdapter;
     private Post post;
@@ -77,7 +79,8 @@ public class PostDetailActivity extends AppCompatActivity {
         postDescription = findViewById(R.id.postDescription);
         postLocation = findViewById(R.id.postLocation);
         postTime = findViewById(R.id.postTime);
-        upvotesCount = findViewById(R.id.upvotesCount);
+        tvLikeCountDetail = findViewById(R.id.tvLikeCountDetail);
+        tvDislikeCountDetail = findViewById(R.id.tvDislikeCountDetail);
 
         // Setup image adapter
         imageAdapter = new PostImageAdapter();
@@ -137,6 +140,10 @@ public class PostDetailActivity extends AppCompatActivity {
                         Object imageUrlObj = documentSnapshot.get(FirebaseConstants.FIELD_ISSUE_IMAGE_URL);
                         if (imageUrlObj instanceof List) {
                             post.setImageUrls((List<String>) imageUrlObj);
+                        } else if (imageUrlObj instanceof String) {
+                            List<String> images = new ArrayList<>();
+                            images.add((String) imageUrlObj);
+                            post.setImageUrls(images);
                         }
 
                         post.setReporterId(documentSnapshot.getString(FirebaseConstants.FIELD_ISSUE_REPORTER_ID));
@@ -147,10 +154,14 @@ public class PostDetailActivity extends AppCompatActivity {
                             post.setTimestamp(timestamp);
                         }
 
-                        // Get upvotes
-                        Long upvotes = documentSnapshot.getLong(FirebaseConstants.FIELD_ISSUE_UPVOTES);
-                        if (upvotes != null) {
-                            post.setUpvotes(upvotes.intValue());
+                        // Get likes/dislikes
+                        Object likedByObj = documentSnapshot.get("likedBy");
+                        if (likedByObj instanceof List) {
+                            post.setLikedBy((List<String>) likedByObj);
+                        }
+                        Object dislikedByObj = documentSnapshot.get("dislikedBy");
+                        if (dislikedByObj instanceof List) {
+                            post.setDislikedBy((List<String>) dislikedByObj);
                         }
 
                         displayPost();
@@ -189,9 +200,12 @@ public class PostDetailActivity extends AppCompatActivity {
         // Set time
         postTime.setText(post.getTimeAgo());
 
-        // Set upvotes
-        int upvotes = post.getUpvotes();
-        upvotesCount.setText(upvotes + (upvotes == 1 ? " upvote" : " upvotes"));
+        // Set likes and dislikes
+        int likes = post.getLikedBy() != null ? post.getLikedBy().size() : 0;
+        int dislikes = post.getDislikedBy() != null ? post.getDislikedBy().size() : 0;
+        
+        if (tvLikeCountDetail != null) tvLikeCountDetail.setText(String.valueOf(likes));
+        if (tvDislikeCountDetail != null) tvDislikeCountDetail.setText(String.valueOf(dislikes));
 
         // Setup images
         if (post.getImageUrls() != null && !post.getImageUrls().isEmpty()) {

@@ -19,6 +19,8 @@ public class Post {
     private long timestamp;
     private int upvotes;
     private long lastUpdated; // For Firestore compatibility
+    private List<String> likedBy;
+    private List<String> dislikedBy;
 
     // Reporter info (optional, can be loaded separately)
     private String reporterName;
@@ -146,6 +148,22 @@ public class Post {
 
     public void setLastUpdated(long lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public List<String> getLikedBy() {
+        return likedBy;
+    }
+
+    public void setLikedBy(List<String> likedBy) {
+        this.likedBy = likedBy;
+    }
+
+    public List<String> getDislikedBy() {
+        return dislikedBy;
+    }
+
+    public void setDislikedBy(List<String> dislikedBy) {
+        this.dislikedBy = dislikedBy;
     }
 
     public String getReporterName() {

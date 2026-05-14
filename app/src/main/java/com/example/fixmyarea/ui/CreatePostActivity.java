@@ -17,6 +17,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -45,7 +46,6 @@ public class CreatePostActivity extends AppCompatActivity {
     private static final int LOCATION_PICKER_REQUEST = 100;
 
     // UI Components
-    private ImageButton backButton;
     private RecyclerView imagesRecyclerView;
     private MaterialButton addImageButton;
     private TextInputEditText titleInput;
@@ -81,6 +81,13 @@ public class CreatePostActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Report an Issue");
+        }
+
         // Initialize Firebase
         firebaseManager = FirebaseManager.getInstance();
 
@@ -101,7 +108,6 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        backButton = findViewById(R.id.backButton);
         imagesRecyclerView = findViewById(R.id.imagesRecyclerView);
         addImageButton = findViewById(R.id.addImageButton);
         titleInput = findViewById(R.id.titleInput);
@@ -175,8 +181,6 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        backButton.setOnClickListener(v -> finish());
-
         addImageButton.setOnClickListener(v -> {
             if (selectedImages.size() < MAX_IMAGES) {
                 imagePickerLauncher.launch("image/*");
@@ -434,5 +438,11 @@ public class CreatePostActivity extends AppCompatActivity {
     // Callback interface for image uploads
     private interface ImageUploadCallback {
         void onComplete(List<String> imageUrls);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 }

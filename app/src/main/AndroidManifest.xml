@@ -82,6 +82,14 @@
         <activity
             android:name=".ui.admin.AnalyticsActivity"
             android:exported="false" />
+            
+        <activity
+            android:name=".ui.NotificationsActivity"
+            android:exported="false" />
+            
+        <activity
+            android:name=".ui.DiscoverActivity"
+            android:exported="false" />
         
         <activity
             android:name=".auth.RegisterActivity"

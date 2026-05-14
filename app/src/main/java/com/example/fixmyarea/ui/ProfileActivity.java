@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.example.fixmyarea.R;
@@ -33,7 +34,6 @@ public class ProfileActivity extends AppCompatActivity {
     private static final String TAG = "ProfileActivity";
     private static final int IMAGE_PICK_CODE = 1002;
 
-    private ImageView backButton;
     private ImageView profileImageView;
     private ImageView editImageButton;
     private EditText nameInput;
@@ -41,9 +41,11 @@ public class ProfileActivity extends AppCompatActivity {
     private EditText phoneInput;
     private EditText nidInput;
     private Button saveButton;
+    private Button logoutButton;
     private ProgressBar progressBar;
 
     private FirebaseManager firebaseManager;
+    private com.example.fixmyarea.utils.SessionManager sessionManager;
     private String userId;
     private Uri selectedImageUri = null;
     private String currentProfileImageUrl = "";
@@ -53,11 +55,18 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        // Initialize Firebase Manager
+        // Initialize Firebase Manager and Session Manager
         firebaseManager = FirebaseManager.getInstance();
+        sessionManager = com.example.fixmyarea.utils.SessionManager.getInstance(this);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("My Profile");
+        }
 
         // Initialize views
-        backButton = findViewById(R.id.backButton);
         profileImageView = findViewById(R.id.profileImageView);
         editImageButton = findViewById(R.id.editImageButton);
         nameInput = findViewById(R.id.nameInput);
@@ -65,12 +74,13 @@ public class ProfileActivity extends AppCompatActivity {
         phoneInput = findViewById(R.id.phoneInput);
         nidInput = findViewById(R.id.nidInput);
         saveButton = findViewById(R.id.saveButton);
+        logoutButton = findViewById(R.id.logoutButton);
         progressBar = findViewById(R.id.progressBar);
 
         // Set click listeners
-        backButton.setOnClickListener(v -> finish());
         editImageButton.setOnClickListener(v -> pickImage());
         saveButton.setOnClickListener(v -> saveProfile());
+        logoutButton.setOnClickListener(v -> logout());
 
         // Load user profile data
         loadUserProfile();
@@ -293,5 +303,26 @@ public class ProfileActivity extends AppCompatActivity {
         nameInput.setEnabled(!show);
         phoneInput.setEnabled(!show);
         nidInput.setEnabled(!show);
+    }
+    private void logout() {
+        // Clear session from DataStore
+        sessionManager.clearSession();
+
+        // Sign out from Firebase
+        firebaseManager.signOut();
+
+        // Navigate to login screen
+        Intent intent = new Intent(this, com.example.fixmyarea.auth.LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+
+        Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 }

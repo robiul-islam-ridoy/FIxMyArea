@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -51,6 +52,8 @@ public class ManageIssuesActivity extends AppCompatActivity implements AdminIssu
         setContentView(R.layout.activity_manage_issues);
 
         // Enable back button
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Manage Issues");
@@ -125,6 +128,10 @@ public class ManageIssuesActivity extends AppCompatActivity implements AdminIssu
                 Object imageUrlObj = doc.get(FirebaseConstants.FIELD_ISSUE_IMAGE_URL);
                 if (imageUrlObj instanceof List) {
                     post.setImageUrls((List<String>) imageUrlObj);
+                } else if (imageUrlObj instanceof String) {
+                    List<String> images = new ArrayList<>();
+                    images.add((String) imageUrlObj);
+                    post.setImageUrls(images);
                 }
 
                 post.setReporterId(doc.getString(FirebaseConstants.FIELD_ISSUE_REPORTER_ID));

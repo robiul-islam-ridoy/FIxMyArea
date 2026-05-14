@@ -4,78 +4,65 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.PopupMenu;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Toast;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Collections;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.fixmyarea.R;
 import com.example.fixmyarea.adapters.PostAdapter;
-import com.example.fixmyarea.auth.LoginActivity;
 import com.example.fixmyarea.firebase.FirebaseConstants;
 import com.example.fixmyarea.firebase.FirebaseManager;
 import com.example.fixmyarea.models.Post;
-import com.example.fixmyarea.utils.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Dashboard Activity displayed after successful login
- */
-public class DashboardActivity extends AppCompatActivity {
+public class DiscoverActivity extends AppCompatActivity {
 
-    private static final String TAG = "DashboardActivity";
+    private static final String TAG = "DiscoverActivity";
 
     private BottomNavigationView bottomNavigation;
     private RecyclerView postsRecyclerView;
     private ProgressBar progressBar;
-    private View emptyState;
+    private LinearLayout emptyState;
+
+    private SearchView searchView;
+    private Spinner sortSpinner;
 
     private FirebaseManager firebaseManager;
-    private SessionManager sessionManager;
     private PostAdapter postAdapter;
+    private List<Post> allPosts = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dashboard);
+        setContentView(R.layout.activity_discover);
 
-        // Initialize Firebase Manager
         firebaseManager = FirebaseManager.getInstance();
 
-        // Initialize Session Manager
-        sessionManager = SessionManager.getInstance(this);
-
-        // Initialize views
-        bottomNavigation = findViewById(R.id.bottomNavigation);
-        postsRecyclerView = findViewById(R.id.postsRecyclerView);
-        progressBar = findViewById(R.id.progressBar);
-        emptyState = findViewById(R.id.emptyState);
-
-        // Setup RecyclerView
+        initializeViews();
+        setupSearchAndSort();
         setupRecyclerView();
-
-        // Load posts
-        loadPosts();
-
-        // Set up bottom navigation
         setupBottomNavigation();
 
-        // Load profile image into bottom nav
+        loadPosts();
+
         loadProfileImageIntoBottomNav();
     }
 
@@ -88,7 +75,7 @@ public class DashboardActivity extends AppCompatActivity {
                             String profileImageUrl = documentSnapshot.getString(FirebaseConstants.FIELD_USER_PROFILE_IMAGE);
                             if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
                                 android.view.MenuItem profileItem = bottomNavigation.getMenu().findItem(R.id.nav_profile);
-                                Glide.with(this)
+                                com.bumptech.glide.Glide.with(this)
                                         .asBitmap()
                                         .load(profileImageUrl)
                                         .circleCrop()
@@ -106,20 +93,44 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
-    private void logout() {
-        // Clear session from DataStore
-        sessionManager.clearSession();
+    private void initializeViews() {
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+        postsRecyclerView = findViewById(R.id.postsRecyclerView);
+        progressBar = findViewById(R.id.progressBar);
+        emptyState = findViewById(R.id.emptyState);
+        searchView = findViewById(R.id.searchView);
+        sortSpinner = findViewById(R.id.sortSpinner);
+    }
 
-        // Sign out from Firebase
-        firebaseManager.signOut();
+    private void setupSearchAndSort() {
+        String[] sortOptions = {"Newest", "Oldest", "Most Liked", "Category"};
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, sortOptions);
+        sortSpinner.setAdapter(spinnerAdapter);
 
-        // Navigate to login screen
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                applyFilterAndSort();
+            }
 
-        Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                applyFilterAndSort();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                applyFilterAndSort();
+                return true;
+            }
+        });
     }
 
     private void setupRecyclerView() {
@@ -127,8 +138,7 @@ public class DashboardActivity extends AppCompatActivity {
         postAdapter = new PostAdapter(currentUserId, new PostAdapter.PostActionCallback() {
             @Override
             public void onPostClick(Post post) {
-                // Open post detail activity
-                Intent intent = new Intent(DashboardActivity.this, PostDetailActivity.class);
+                Intent intent = new Intent(DiscoverActivity.this, PostDetailActivity.class);
                 intent.putExtra(PostDetailActivity.EXTRA_POST_ID, post.getPostId());
                 intent.putExtra(PostDetailActivity.EXTRA_POST_TITLE, post.getTitle());
                 intent.putExtra(PostDetailActivity.EXTRA_POST_DESCRIPTION, post.getDescription());
@@ -167,12 +177,10 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void loadPosts() {
-        // Show loading
         progressBar.setVisibility(View.VISIBLE);
         emptyState.setVisibility(View.GONE);
         postsRecyclerView.setVisibility(View.GONE);
 
-        // Fetch posts from Firestore, ordered by timestamp (newest first)
         firebaseManager.getFirestore().collection(FirebaseConstants.COLLECTION_ISSUES)
                 .orderBy(FirebaseConstants.FIELD_ISSUE_TIMESTAMP, Query.Direction.DESCENDING)
                 .get()
@@ -188,7 +196,6 @@ public class DashboardActivity extends AppCompatActivity {
                         post.setStatus(document.getString(FirebaseConstants.FIELD_ISSUE_STATUS));
                         post.setLocation(document.getString(FirebaseConstants.FIELD_ISSUE_LOCATION));
 
-                        // Get coordinates if available
                         if (document.contains(FirebaseConstants.FIELD_ISSUE_LATITUDE)) {
                             post.setLatitude(document.getDouble(FirebaseConstants.FIELD_ISSUE_LATITUDE));
                         }
@@ -196,7 +203,6 @@ public class DashboardActivity extends AppCompatActivity {
                             post.setLongitude(document.getDouble(FirebaseConstants.FIELD_ISSUE_LONGITUDE));
                         }
 
-                        // Get images
                         Object imageUrlObj = document.get(FirebaseConstants.FIELD_ISSUE_IMAGE_URL);
                         if (imageUrlObj instanceof List) {
                             post.setImageUrls((List<String>) imageUrlObj);
@@ -208,13 +214,11 @@ public class DashboardActivity extends AppCompatActivity {
 
                         post.setReporterId(document.getString(FirebaseConstants.FIELD_ISSUE_REPORTER_ID));
 
-                        // Get timestamp
                         Long timestamp = document.getLong(FirebaseConstants.FIELD_ISSUE_TIMESTAMP);
                         if (timestamp != null) {
                             post.setTimestamp(timestamp);
                         }
 
-                        // Get upvotes and likes/dislikes
                         Long upvotes = document.getLong(FirebaseConstants.FIELD_ISSUE_UPVOTES);
                         if (upvotes != null) {
                             post.setUpvotes(upvotes.intValue());
@@ -233,35 +237,19 @@ public class DashboardActivity extends AppCompatActivity {
                         posts.add(post);
                     }
 
-                    // Hide loading
                     progressBar.setVisibility(View.GONE);
+                    allPosts = posts;
 
-                    // Filter for "My Area" (Mocked for now, assumes "Dhaka")
-                    List<Post> areaPosts = new ArrayList<>();
-                    for (Post p : posts) {
-                        if (p.getLocation() != null && p.getLocation().toLowerCase().contains("dhaka")) {
-                            areaPosts.add(p);
-                        } else if (p.getLocation() == null) {
-                            areaPosts.add(p); // Include if no location
-                        }
-                    }
-                    
-                    // If no posts in "dhaka", just show all posts as a fallback for the prototype
-                    if (areaPosts.isEmpty()) {
-                        areaPosts.addAll(posts);
-                    }
-
-                    // Update UI based on results
-                    if (areaPosts.isEmpty()) {
+                    if (posts.isEmpty()) {
                         emptyState.setVisibility(View.VISIBLE);
                         postsRecyclerView.setVisibility(View.GONE);
                     } else {
                         emptyState.setVisibility(View.GONE);
                         postsRecyclerView.setVisibility(View.VISIBLE);
-                        postAdapter.setPosts(areaPosts);
+                        applyFilterAndSort();
                     }
 
-                    Log.d(TAG, "Loaded " + areaPosts.size() + " posts");
+                    Log.d(TAG, "Loaded " + posts.size() + " posts");
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
@@ -273,45 +261,41 @@ public class DashboardActivity extends AppCompatActivity {
                 });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Reload posts when returning to dashboard
-        loadPosts();
-    }
+    private void applyFilterAndSort() {
+        if (allPosts == null) return;
 
-    private void setupBottomNavigation() {
-        bottomNavigation.setItemIconTintList(null);
-        bottomNavigation.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
+        String query = searchView.getQuery() != null ? searchView.getQuery().toString().toLowerCase() : "";
+        String sortOption = sortSpinner.getSelectedItem() != null ? sortSpinner.getSelectedItem().toString() : "Newest";
 
-            if (itemId == R.id.nav_home) {
-                // Already on home
-                return true;
-            } else if (itemId == R.id.nav_discover) {
-                Intent intent = new Intent(this, DiscoverActivity.class);
-                startActivity(intent);
-                return true;
-            } else if (itemId == R.id.nav_create) {
-                // Navigate to Create Post Activity
-                Intent intent = new Intent(this, CreatePostActivity.class);
-                startActivity(intent);
-                return true;
-            } else if (itemId == R.id.nav_notifications) {
-                // Navigate to Notifications Activity
-                Intent intent = new Intent(this, NotificationsActivity.class);
-                startActivity(intent);
-                return true;
-            } else if (itemId == R.id.nav_profile) {
-                Intent intent = new Intent(this, ProfileActivity.class);
-                startActivity(intent);
-                return true;
+        List<Post> filtered = new ArrayList<>();
+        for (Post post : allPosts) {
+            boolean matchesSearch = false;
+            if (post.getTitle() != null && post.getTitle().toLowerCase().contains(query)) matchesSearch = true;
+            if (post.getDescription() != null && post.getDescription().toLowerCase().contains(query)) matchesSearch = true;
+            if (post.getCategory() != null && post.getCategory().toLowerCase().contains(query)) matchesSearch = true;
+            
+            if (matchesSearch) {
+                filtered.add(post);
             }
-            return false;
+        }
+
+        Collections.sort(filtered, (p1, p2) -> {
+            if ("Oldest".equals(sortOption)) {
+                return Long.compare(p1.getTimestamp(), p2.getTimestamp());
+            } else if ("Most Liked".equals(sortOption)) {
+                int likes1 = p1.getLikedBy() != null ? p1.getLikedBy().size() : 0;
+                int likes2 = p2.getLikedBy() != null ? p2.getLikedBy().size() : 0;
+                return Integer.compare(likes2, likes1);
+            } else if ("Category".equals(sortOption)) {
+                String cat1 = p1.getCategory() != null ? p1.getCategory() : "";
+                String cat2 = p2.getCategory() != null ? p2.getCategory() : "";
+                return cat1.compareToIgnoreCase(cat2);
+            } else { // "Newest"
+                return Long.compare(p2.getTimestamp(), p1.getTimestamp());
+            }
         });
 
-        // Set Home as the default selected item
-        bottomNavigation.setSelectedItemId(R.id.nav_home);
+        postAdapter.setPosts(filtered);
     }
 
     private void handleLikeDislike(Post post, boolean isLike) {
@@ -396,5 +380,43 @@ public class DashboardActivity extends AppCompatActivity {
         notification.put("isRead", false);
 
         firebaseManager.getFirestore().collection("notifications").add(notification);
+    }
+
+    private void setupBottomNavigation() {
+        bottomNavigation.setItemIconTintList(null);
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_home) {
+                Intent intent = new Intent(this, DashboardActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.nav_discover) {
+                return true; // Already on discover
+            } else if (itemId == R.id.nav_create) {
+                Intent intent = new Intent(this, CreatePostActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.nav_notifications) {
+                Intent intent = new Intent(this, NotificationsActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                Intent intent = new Intent(this, ProfileActivity.class);
+                startActivity(intent);
+                return true;
+            }
+            return false;
+        });
+
+        // Set Discover as the default selected item
+        bottomNavigation.setSelectedItemId(R.id.nav_discover);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bottomNavigation.setSelectedItemId(R.id.nav_discover);
     }
 }

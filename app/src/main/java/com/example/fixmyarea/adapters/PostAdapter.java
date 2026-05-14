@@ -3,7 +3,10 @@ package com.example.fixmyarea.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,13 +26,18 @@ import java.util.List;
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
     private List<Post> posts = new ArrayList<>();
-    private OnPostClickListener listener;
+    private String currentUserId;
+    private PostActionCallback listener;
 
-    public interface OnPostClickListener {
+    public interface PostActionCallback {
         void onPostClick(Post post);
+        void onLikeClick(Post post);
+        void onDislikeClick(Post post);
+        void onDeleteClick(Post post);
     }
 
-    public PostAdapter(OnPostClickListener listener) {
+    public PostAdapter(String currentUserId, PostActionCallback listener) {
+        this.currentUserId = currentUserId;
         this.listener = listener;
     }
 
@@ -65,6 +73,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         private TextView postLocation;
         private TextView postTime;
         private TextView postStatus;
+        private ImageButton btnDelete;
+        private LinearLayout btnLike;
+        private LinearLayout btnDislike;
+        private TextView tvLikeCount;
+        private TextView tvDislikeCount;
+        private ImageView icLike;
+        private ImageView icDislike;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -75,11 +90,39 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             postLocation = itemView.findViewById(R.id.postLocation);
             postTime = itemView.findViewById(R.id.postTime);
             postStatus = itemView.findViewById(R.id.postStatus);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnLike = itemView.findViewById(R.id.btnLike);
+            btnDislike = itemView.findViewById(R.id.btnDislike);
+            tvLikeCount = itemView.findViewById(R.id.tvLikeCount);
+            tvDislikeCount = itemView.findViewById(R.id.tvDislikeCount);
+            icLike = itemView.findViewById(R.id.icLike);
+            icDislike = itemView.findViewById(R.id.icDislike);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION && listener != null) {
                     listener.onPostClick(posts.get(position));
+                }
+            });
+
+            btnLike.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && listener != null) {
+                    listener.onLikeClick(posts.get(position));
+                }
+            });
+
+            btnDislike.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && listener != null) {
+                    listener.onDislikeClick(posts.get(position));
+                }
+            });
+
+            btnDelete.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && listener != null) {
+                    listener.onDeleteClick(posts.get(position));
                 }
             });
         }
@@ -122,6 +165,39 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                         .into(postImage);
             } else {
                 postImage.setImageResource(R.drawable.ic_launcher_foreground);
+            }
+
+            // Show/hide delete button
+            if (currentUserId != null && currentUserId.equals(post.getReporterId())) {
+                btnDelete.setVisibility(View.VISIBLE);
+            } else {
+                btnDelete.setVisibility(View.GONE);
+            }
+
+            // Setup Like/Dislike counts and states
+            int likeCount = post.getLikedBy() != null ? post.getLikedBy().size() : 0;
+            int dislikeCount = post.getDislikedBy() != null ? post.getDislikedBy().size() : 0;
+            
+            tvLikeCount.setText(String.valueOf(likeCount));
+            tvDislikeCount.setText(String.valueOf(dislikeCount));
+
+            boolean isLiked = post.getLikedBy() != null && post.getLikedBy().contains(currentUserId);
+            boolean isDisliked = post.getDislikedBy() != null && post.getDislikedBy().contains(currentUserId);
+
+            if (isLiked) {
+                icLike.setColorFilter(itemView.getContext().getColor(R.color.black)); // Or blue
+                tvLikeCount.setTextColor(itemView.getContext().getColor(R.color.black));
+            } else {
+                icLike.setColorFilter(android.graphics.Color.parseColor("#666666"));
+                tvLikeCount.setTextColor(android.graphics.Color.parseColor("#666666"));
+            }
+
+            if (isDisliked) {
+                icDislike.setColorFilter(itemView.getContext().getColor(R.color.black));
+                tvDislikeCount.setTextColor(itemView.getContext().getColor(R.color.black));
+            } else {
+                icDislike.setColorFilter(android.graphics.Color.parseColor("#666666"));
+                tvDislikeCount.setTextColor(android.graphics.Color.parseColor("#666666"));
             }
         }
 
