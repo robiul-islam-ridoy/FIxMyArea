@@ -10,8 +10,8 @@
 
     <item
         android:id="@+id/nav_discover"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="Discover"
+        android:icon="@drawable/outline_search_24"
+        android:title="Search"
         app:iconTint="@color/nav_item_color_state" />
 
     <item
@@ -29,6 +29,7 @@
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_profile_placeholder"
-        android:title="Profile" />
+        android:title="Profile"
+        app:iconTint="@color/nav_item_color_state" />
 
 </menu>

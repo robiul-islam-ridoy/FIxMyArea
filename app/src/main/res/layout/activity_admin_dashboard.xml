@@ -3,44 +3,45 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <!-- Header Section -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="#1976D2">
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_gradient_primary"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="24dp">
 
                 <TextView
                     android:id="@+id/welcomeText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Welcome, Admin"
-                    android:textColor="@android:color/white"
-                    android:textSize="24sp"
+                    android:textColor="@color/white"
+                    android:textSize="26sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Admin Control Panel"
-                    android:textColor="#E3F2FD"
-                    android:textSize="14sp"
+                    android:textColor="@color/accent_extra_light"
+                    android:textSize="15sp"
                     android:layout_marginTop="4dp" />
 
                 <TextView
@@ -48,13 +49,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Loading statistics..."
-                    android:textColor="@android:color/white"
-                    android:textSize="12sp"
-                    android:layout_marginTop="12dp" />
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_glass_pill"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"/>
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Loading Indicator -->
         <ProgressBar
@@ -71,20 +75,18 @@
             android:text="Admin Functions"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginBottom="12dp" />
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp" />
 
         <!-- Manage Users Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/manageUsersCard"
+            style="@style/Widget.FixMyArea.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="14dp"
             android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="3dp">
+            android:focusable="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -97,8 +99,9 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:src="@android:drawable/ic_menu_myplaces"
-                    android:tint="#4CAF50"
-                    android:padding="8dp" />
+                    app:tint="@color/status_resolved"
+                    android:background="@drawable/bg_circle_icon"
+                    android:padding="10dp" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -113,14 +116,14 @@
                         android:text="Manage Users"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#333333" />
+                        android:textColor="@color/text_primary" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Add, edit, or remove users"
-                        android:textSize="12sp"
-                        android:textColor="#666666"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_secondary"
                         android:layout_marginTop="2dp" />
 
                 </LinearLayout>
@@ -128,25 +131,22 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_more"
-                    android:rotation="270"
-                    android:tint="#999999" />
+                    android:src="@android:drawable/ic_media_play"
+                    app:tint="@color/text_hint" />
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Manage Issues Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/manageIssuesCard"
+            style="@style/Widget.FixMyArea.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="14dp"
             android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="3dp">
+            android:focusable="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -159,8 +159,9 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:src="@android:drawable/ic_menu_edit"
-                    android:tint="#FF9800"
-                    android:padding="8dp" />
+                    app:tint="@color/status_pending"
+                    android:background="@drawable/bg_circle_icon"
+                    android:padding="10dp" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -175,14 +176,14 @@
                         android:text="Manage Issue Reports"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#333333" />
+                        android:textColor="@color/text_primary" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Approve or reject issue reports"
-                        android:textSize="12sp"
-                        android:textColor="#666666"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_secondary"
                         android:layout_marginTop="2dp" />
 
                 </LinearLayout>
@@ -190,25 +191,22 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_more"
-                    android:rotation="270"
-                    android:tint="#999999" />
+                    android:src="@android:drawable/ic_media_play"
+                    app:tint="@color/text_hint" />
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Analytics Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/analyticsCard"
+            style="@style/Widget.FixMyArea.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="14dp"
             android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="3dp">
+            android:focusable="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -221,8 +219,9 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:src="@android:drawable/ic_menu_sort_by_size"
-                    android:tint="#2196F3"
-                    android:padding="8dp" />
+                    app:tint="@color/status_in_progress"
+                    android:background="@drawable/bg_circle_icon"
+                    android:padding="10dp" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -237,14 +236,14 @@
                         android:text="View Analytics"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#333333" />
+                        android:textColor="@color/text_primary" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Statistics and reports"
-                        android:textSize="12sp"
-                        android:textColor="#666666"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_secondary"
                         android:layout_marginTop="2dp" />
 
                 </LinearLayout>
@@ -252,25 +251,22 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_more"
-                    android:rotation="270"
-                    android:tint="#999999" />
+                    android:src="@android:drawable/ic_media_play"
+                    app:tint="@color/text_hint" />
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Logout Card -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/logoutCard"
+            style="@style/Widget.FixMyArea.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="14dp"
             android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="3dp">
+            android:focusable="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -283,8 +279,9 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:src="@android:drawable/ic_lock_power_off"
-                    android:tint="#F44336"
-                    android:padding="8dp" />
+                    app:tint="@color/status_rejected"
+                    android:background="@drawable/bg_circle_icon"
+                    android:padding="10dp" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -299,14 +296,14 @@
                         android:text="Logout"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#333333" />
+                        android:textColor="@color/text_primary" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Sign out from admin account"
-                        android:textSize="12sp"
-                        android:textColor="#666666"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_secondary"
                         android:layout_marginTop="2dp" />
 
                 </LinearLayout>
@@ -314,13 +311,12 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_more"
-                    android:rotation="270"
-                    android:tint="#999999" />
+                    android:src="@android:drawable/ic_media_play"
+                    app:tint="@color/text_hint" />
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 

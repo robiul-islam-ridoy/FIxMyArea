@@ -4,16 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="@color/background">
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#1976D2"
-        android:elevation="4dp"
-        app:titleTextColor="@android:color/white" />
+        android:background="@color/primary"
+        android:elevation="6dp"
+        app:titleTextColor="@color/white" />
 
     <!-- Content -->
     <FrameLayout
@@ -45,7 +45,7 @@
             android:layout_gravity="center"
             android:text="No users found"
             android:textSize="16sp"
-            android:textColor="#999999"
+            android:textColor="@color/text_hint"
             android:visibility="gone" />
 
     </FrameLayout>
@@ -58,7 +58,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:src="@android:drawable/ic_input_add"
-        app:tint="@android:color/white"
-        app:backgroundTint="#4CAF50" />
+        app:tint="@color/white"
+        app:backgroundTint="@color/status_resolved" />
 
 </LinearLayout>

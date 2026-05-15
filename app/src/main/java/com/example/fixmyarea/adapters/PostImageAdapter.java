@@ -20,6 +20,15 @@ import java.util.List;
 public class PostImageAdapter extends RecyclerView.Adapter<PostImageAdapter.ImageViewHolder> {
 
     private List<String> imageUrls = new ArrayList<>();
+    private OnImageClickListener clickListener;
+
+    public interface OnImageClickListener {
+        void onImageClick(int position);
+    }
+
+    public void setOnImageClickListener(OnImageClickListener listener) {
+        this.clickListener = listener;
+    }
 
     public void setImageUrls(List<String> imageUrls) {
         this.imageUrls = imageUrls != null ? imageUrls : new ArrayList<>();
@@ -33,7 +42,7 @@ public class PostImageAdapter extends RecyclerView.Adapter<PostImageAdapter.Imag
         imageView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         return new ImageViewHolder(imageView);
     }
 
@@ -44,8 +53,14 @@ public class PostImageAdapter extends RecyclerView.Adapter<PostImageAdapter.Imag
                 .load(imageUrl)
                 .placeholder(R.drawable.ic_launcher_foreground)
                 .error(R.drawable.ic_launcher_foreground)
-                .centerCrop()
+                .fitCenter()
                 .into(holder.imageView);
+                
+        holder.imageView.setOnClickListener(v -> {
+            if (clickListener != null) {
+                clickListener.onImageClick(position);
+            }
+        });
     }
 
     @Override

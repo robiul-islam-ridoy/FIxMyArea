@@ -24,7 +24,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fixmyarea.R;
 import com.example.fixmyarea.firebase.FirebaseConstants;
 import com.example.fixmyarea.firebase.FirebaseManager;
+import com.example.fixmyarea.utils.BottomNavHelper;
 import com.example.fixmyarea.utils.CloudinaryUploader;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -47,7 +49,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
     // UI Components
     private RecyclerView imagesRecyclerView;
-    private MaterialButton addImageButton;
+    private android.view.View addImageButton;
     private TextInputEditText titleInput;
     private TextInputEditText descriptionInput;
     private AutoCompleteTextView categoryInput;
@@ -59,8 +61,10 @@ public class CreatePostActivity extends AppCompatActivity {
     private MaterialButton pickLocationButton;
     private TextView selectedLocationText;
 
-    private MaterialButton submitButton;
+    private android.widget.Button submitButton;
     private ProgressBar progressBar;
+
+    private BottomNavigationView bottomNavigation;
 
     // Data
     private List<Uri> selectedImages = new ArrayList<>();
@@ -84,9 +88,12 @@ public class CreatePostActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setTitle("Report an Issue");
         }
+
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+        BottomNavHelper.setup(this, bottomNavigation, R.id.nav_create);
 
         // Initialize Firebase
         firebaseManager = FirebaseManager.getInstance();
@@ -213,10 +220,10 @@ public class CreatePostActivity extends AppCompatActivity {
     private void updateAddImageButton() {
         if (selectedImages.size() >= MAX_IMAGES) {
             addImageButton.setEnabled(false);
-            addImageButton.setText("Maximum images reached");
+            addImageButton.setAlpha(0.5f);
         } else {
             addImageButton.setEnabled(true);
-            addImageButton.setText("Add Images (" + selectedImages.size() + "/" + MAX_IMAGES + ")");
+            addImageButton.setAlpha(1.0f);
         }
     }
 
@@ -435,14 +442,15 @@ public class CreatePostActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BottomNavHelper.syncTabState(this, bottomNavigation, R.id.nav_create);
+    }
+
     // Callback interface for image uploads
     private interface ImageUploadCallback {
         void onComplete(List<String> imageUrls);
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
-    }
 }

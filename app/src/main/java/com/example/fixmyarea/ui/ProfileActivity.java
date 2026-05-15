@@ -20,7 +20,9 @@ import com.bumptech.glide.Glide;
 import com.example.fixmyarea.R;
 import com.example.fixmyarea.firebase.FirebaseConstants;
 import com.example.fixmyarea.firebase.FirebaseManager;
+import com.example.fixmyarea.utils.BottomNavHelper;
 import com.github.dhaval2404.imagepicker.ImagePicker;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.HashMap;
@@ -35,7 +37,7 @@ public class ProfileActivity extends AppCompatActivity {
     private static final int IMAGE_PICK_CODE = 1002;
 
     private ImageView profileImageView;
-    private ImageView editImageButton;
+    private android.view.View editImageButton;
     private EditText nameInput;
     private EditText emailInput;
     private EditText phoneInput;
@@ -50,6 +52,8 @@ public class ProfileActivity extends AppCompatActivity {
     private Uri selectedImageUri = null;
     private String currentProfileImageUrl = "";
 
+    private BottomNavigationView bottomNavigation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,11 +66,14 @@ public class ProfileActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("My Profile");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            getSupportActionBar().setTitle("Profile");
         }
 
         // Initialize views
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+        BottomNavHelper.setup(this, bottomNavigation, R.id.nav_profile);
+
         profileImageView = findViewById(R.id.profileImageView);
         editImageButton = findViewById(R.id.editImageButton);
         nameInput = findViewById(R.id.nameInput);
@@ -84,6 +91,12 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Load user profile data
         loadUserProfile();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BottomNavHelper.syncTabState(this, bottomNavigation, R.id.nav_profile);
     }
 
     private void loadUserProfile() {
@@ -320,9 +333,4 @@ public class ProfileActivity extends AppCompatActivity {
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
-    }
 }

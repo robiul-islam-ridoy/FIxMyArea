@@ -85,6 +85,15 @@ public class PostDetailActivity extends AppCompatActivity {
         // Setup image adapter
         imageAdapter = new PostImageAdapter();
         imagesViewPager.setAdapter(imageAdapter);
+        
+        imageAdapter.setOnImageClickListener(position -> {
+            if (post != null && post.getImageUrls() != null && !post.getImageUrls().isEmpty()) {
+                android.content.Intent intent = new android.content.Intent(this, FullScreenImageActivity.class);
+                intent.putStringArrayListExtra(FullScreenImageActivity.EXTRA_IMAGE_URLS, new java.util.ArrayList<>(post.getImageUrls()));
+                intent.putExtra(FullScreenImageActivity.EXTRA_INITIAL_POSITION, position);
+                startActivity(intent);
+            }
+        });
     }
 
     private void loadPostData() {
@@ -112,8 +121,31 @@ public class PostDetailActivity extends AppCompatActivity {
             post.setImageUrls(getIntent().getStringArrayListExtra(EXTRA_POST_IMAGE_URLS));
         }
 
-        // Display post data
+        // Display post data immediately (likes/dislikes might be 0)
         displayPost();
+
+        // Fetch likes/dislikes from Firestore asynchronously
+        if (post.getPostId() != null) {
+            firebaseManager.getDocument("issues", post.getPostId())
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            boolean changed = false;
+                            Object likedByObj = documentSnapshot.get("likedBy");
+                            if (likedByObj instanceof List) {
+                                post.setLikedBy((List<String>) likedByObj);
+                                changed = true;
+                            }
+                            Object dislikedByObj = documentSnapshot.get("dislikedBy");
+                            if (dislikedByObj instanceof List) {
+                                post.setDislikedBy((List<String>) dislikedByObj);
+                                changed = true;
+                            }
+                            if (changed) {
+                                displayPost();
+                            }
+                        }
+                    });
+        }
     }
 
     private void loadPostFromFirestore(String postId) {
@@ -246,30 +278,30 @@ public class PostDetailActivity extends AppCompatActivity {
     private int getCategoryColor(String category) {
         switch (category.toLowerCase()) {
             case "road":
-                return android.R.color.holo_orange_dark;
+                return R.color.cat_road;
             case "water":
-                return android.R.color.holo_blue_dark;
+                return R.color.cat_water;
             case "electricity":
-                return android.R.color.holo_orange_light;
+                return R.color.cat_electricity;
             case "sanitation":
-                return android.R.color.holo_green_dark;
+                return R.color.cat_sanitation;
             default:
-                return android.R.color.darker_gray;
+                return R.color.cat_other;
         }
     }
 
     private int getStatusColor(String status) {
         switch (status.toLowerCase()) {
             case "pending":
-                return android.R.color.holo_orange_dark;
+                return R.color.status_pending;
             case "in_progress":
-                return android.R.color.holo_blue_dark;
+                return R.color.status_in_progress;
             case "resolved":
-                return android.R.color.holo_green_dark;
+                return R.color.status_resolved;
             case "rejected":
-                return android.R.color.holo_red_dark;
+                return R.color.status_rejected;
             default:
-                return android.R.color.darker_gray;
+                return R.color.text_secondary;
         }
     }
 }

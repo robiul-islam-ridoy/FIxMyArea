@@ -4,22 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="@color/background">
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#1976D2"
-        android:elevation="4dp"
-        app:titleTextColor="@android:color/white" />
+        android:background="@color/primary"
+        android:elevation="6dp"
+        app:titleTextColor="@color/white" />
 
     <!-- Filter Chips -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@color/surface"
         android:elevation="2dp"
         android:padding="8dp">
 
@@ -96,7 +96,7 @@
             android:layout_gravity="center"
             android:text="No issues found"
             android:textSize="16sp"
-            android:textColor="#999999"
+            android:textColor="@color/text_hint"
             android:visibility="gone" />
 
     </FrameLayout>

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- empty - styles moved to themes.xml -->
+    <dimen name="bottom_nav_content_padding">72dp</dimen>
 </resources>

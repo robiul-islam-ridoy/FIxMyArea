@@ -1,5 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Primary Brand -->
+    <color name="primary">#121212</color>
+    <color name="primary_light">#2A2A2A</color>
+    <color name="primary_dark">#000000</color>
+
+    <!-- Accent / CTA -->
+    <color name="accent">#212121</color>
+    <color name="accent_light">#E0E0E0</color>
+    <color name="accent_extra_light">#F5F5F5</color>
+    <color name="accent_dark">#000000</color>
+
+    <!-- Backgrounds -->
+    <color name="background">#F9FAFB</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#F3F4F6</color>
+
+    <!-- Text -->
+    <color name="text_primary">#111827</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="text_hint">#9CA3AF</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_on_accent">#FFFFFF</color>
+
+    <!-- Status Colors -->
+    <color name="status_pending">#F39C12</color>
+    <color name="status_pending_bg">#FFF3CD</color>
+    <color name="status_in_progress">#3498DB</color>
+    <color name="status_in_progress_bg">#DBEAFE</color>
+    <color name="status_resolved">#2ECC71</color>
+    <color name="status_resolved_bg">#D1FAE5</color>
+    <color name="status_rejected">#E74C3C</color>
+    <color name="status_rejected_bg">#FEE2E2</color>
+
+    <!-- Category Colors -->
+    <color name="cat_road">#F97316</color>
+    <color name="cat_road_bg">#FFF0E0</color>
+    <color name="cat_water">#3B82F6</color>
+    <color name="cat_water_bg">#EFF6FF</color>
+    <color name="cat_electricity">#EAB308</color>
+    <color name="cat_electricity_bg">#FEFCE8</color>
+    <color name="cat_sanitation">#22C55E</color>
+    <color name="cat_sanitation_bg">#F0FDF4</color>
+    <color name="cat_other">#8B5CF6</color>
+    <color name="cat_other_bg">#F5F3FF</color>
+
+    <!-- Actions -->
+    <color name="like_active">#00B4D8</color>
+    <color name="dislike_active">#E74C3C</color>
+    <color name="action_inactive">#9CA3AF</color>
+
+    <!-- UI Elements -->
+    <color name="divider">#E5E7EB</color>
+    <color name="border">#D1D5DB</color>
+    <color name="shadow">#0A000000</color>
+    <color name="overlay_dark">#80000000</color>
+    <color name="overlay_light">#40FFFFFF</color>
+
+    <!-- Bottom Navigation -->
+    <color name="nav_active">#111827</color>
+    <color name="nav_inactive">#6B7280</color>
 </resources>

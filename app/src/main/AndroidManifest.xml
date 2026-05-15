@@ -65,6 +65,11 @@
             android:name=".ui.PostDetailActivity"
             android:exported="false" />
         
+        <activity
+            android:name=".ui.FullScreenImageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+        
         <!-- Admin Activities -->
         <activity
             android:name=".ui.admin.AdminDashboardActivity"

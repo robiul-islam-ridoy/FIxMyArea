@@ -21,6 +21,7 @@ import com.example.fixmyarea.R;
 import com.example.fixmyarea.adapters.PostAdapter;
 import com.example.fixmyarea.firebase.FirebaseConstants;
 import com.example.fixmyarea.firebase.FirebaseManager;
+import com.example.fixmyarea.utils.BottomNavHelper;
 import com.example.fixmyarea.models.Post;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseUser;
@@ -59,38 +60,9 @@ public class DiscoverActivity extends AppCompatActivity {
         initializeViews();
         setupSearchAndSort();
         setupRecyclerView();
-        setupBottomNavigation();
+        BottomNavHelper.setup(this, bottomNavigation, R.id.nav_discover);
 
         loadPosts();
-
-        loadProfileImageIntoBottomNav();
-    }
-
-    private void loadProfileImageIntoBottomNav() {
-        FirebaseUser currentUser = firebaseManager.getCurrentUser();
-        if (currentUser != null) {
-            firebaseManager.getDocument(FirebaseConstants.COLLECTION_USERS, currentUser.getUid())
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            String profileImageUrl = documentSnapshot.getString(FirebaseConstants.FIELD_USER_PROFILE_IMAGE);
-                            if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-                                android.view.MenuItem profileItem = bottomNavigation.getMenu().findItem(R.id.nav_profile);
-                                com.bumptech.glide.Glide.with(this)
-                                        .asBitmap()
-                                        .load(profileImageUrl)
-                                        .circleCrop()
-                                        .into(new com.bumptech.glide.request.target.CustomTarget<android.graphics.Bitmap>() {
-                                            @Override
-                                            public void onResourceReady(@androidx.annotation.NonNull android.graphics.Bitmap resource, @androidx.annotation.Nullable com.bumptech.glide.request.transition.Transition<? super android.graphics.Bitmap> transition) {
-                                                profileItem.setIcon(new android.graphics.drawable.BitmapDrawable(getResources(), resource));
-                                            }
-                                            @Override
-                                            public void onLoadCleared(@androidx.annotation.Nullable android.graphics.drawable.Drawable placeholder) {}
-                                        });
-                            }
-                        }
-                    });
-        }
     }
 
     private void initializeViews() {
@@ -382,41 +354,9 @@ public class DiscoverActivity extends AppCompatActivity {
         firebaseManager.getFirestore().collection("notifications").add(notification);
     }
 
-    private void setupBottomNavigation() {
-        bottomNavigation.setItemIconTintList(null);
-        bottomNavigation.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.nav_home) {
-                Intent intent = new Intent(this, DashboardActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                return true;
-            } else if (itemId == R.id.nav_discover) {
-                return true; // Already on discover
-            } else if (itemId == R.id.nav_create) {
-                Intent intent = new Intent(this, CreatePostActivity.class);
-                startActivity(intent);
-                return true;
-            } else if (itemId == R.id.nav_notifications) {
-                Intent intent = new Intent(this, NotificationsActivity.class);
-                startActivity(intent);
-                return true;
-            } else if (itemId == R.id.nav_profile) {
-                Intent intent = new Intent(this, ProfileActivity.class);
-                startActivity(intent);
-                return true;
-            }
-            return false;
-        });
-
-        // Set Discover as the default selected item
-        bottomNavigation.setSelectedItemId(R.id.nav_discover);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
-        bottomNavigation.setSelectedItemId(R.id.nav_discover);
+        BottomNavHelper.syncTabState(this, bottomNavigation, R.id.nav_discover);
     }
 }
