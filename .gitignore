@@ -53,3 +53,10 @@ Thumbs.db
 *.log
 *.swp
 local.properties
+
+# Local defense documentation (not for repo)
+docs/
+.docvenv/
+PROJECT_DOCUMENTATION*.md
+FixMyArea_Final_Year_Defense_Documentation.docx
+robiul-*.pdf

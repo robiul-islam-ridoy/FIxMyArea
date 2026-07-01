@@ -34,7 +34,7 @@ public class RegisterActivity extends AppCompatActivity {
     private static final int IMAGE_PICK_CODE = 1001;
 
     private ImageView profileImageView;
-    private Button chooseImageButton;
+    private View chooseImageButton;
     private EditText nameInput;
     private EditText emailInput;
     private EditText phoneInput;

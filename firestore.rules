@@ -2,11 +2,56 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ⚠️ TEST MODE - Allow all read/write operations
-    // ONLY use this for development/testing
-    // Update these rules before deploying to production!
-    match /{document=**} {
-      allow read, write: if true;
+
+    // ─── Helper Functions ──────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ─── Users Collection ──────────────────────────────────────────────
+    // Users can read/write their own profile; admins can read all users
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ─── Issues Collection ─────────────────────────────────────────────
+    // Any authenticated user can read/create; only reporter or admin can update/delete
+    match /issues/{issueId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() &&
+                       (isOwner(resource.data.reporterId) || isAdmin());
+      allow delete: if isAuthenticated() &&
+                       (isOwner(resource.data.reporterId) || isAdmin());
+    }
+
+    // ─── Comments Collection ───────────────────────────────────────────
+    // Authenticated users can read and create; only comment owner or admin can delete
+    match /comments/{commentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && isOwner(resource.data.userId);
+      allow delete: if isAuthenticated() &&
+                       (isOwner(resource.data.userId) || isAdmin());
+    }
+
+    // ─── Areas Collection ──────────────────────────────────────────────
+    // Read-only for all authenticated users; only admins can write
+    match /areas/{areaId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
   }
 }
