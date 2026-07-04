@@ -38,6 +38,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText nameInput;
     private EditText emailInput;
     private EditText phoneInput;
+    private EditText addressInput;
     private EditText nidInput;
     private EditText passwordInput;
     private EditText confirmPasswordInput;
@@ -68,6 +69,7 @@ public class RegisterActivity extends AppCompatActivity {
         nameInput = findViewById(R.id.nameInput);
         emailInput = findViewById(R.id.emailInput);
         phoneInput = findViewById(R.id.phoneInput);
+        addressInput = findViewById(R.id.addressInput);
         nidInput = findViewById(R.id.nidInput);
         passwordInput = findViewById(R.id.passwordInput);
         confirmPasswordInput = findViewById(R.id.confirmPasswordInput);
@@ -108,12 +110,13 @@ public class RegisterActivity extends AppCompatActivity {
         String name = nameInput.getText().toString().trim();
         String email = emailInput.getText().toString().trim();
         String phone = phoneInput.getText().toString().trim();
+        String address = addressInput.getText().toString().trim();
         String nid = nidInput.getText().toString().trim();
         String password = passwordInput.getText().toString();
         String confirmPassword = confirmPasswordInput.getText().toString();
 
         // Validate inputs
-        if (!validateInputs(name, email, phone, nid, password, confirmPassword)) {
+        if (!validateInputs(name, email, phone, address, nid, password, confirmPassword)) {
             return;
         }
 
@@ -122,15 +125,15 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Upload image first (if selected)
         if (selectedImageUri != null) {
-            uploadImageAndRegister(name, email, phone, nid, password);
+            uploadImageAndRegister(name, email, phone, address, nid, password);
         } else {
             // Register without image
-            createUserAccount(name, email, phone, nid, "", password);
+            createUserAccount(name, email, phone, address, nid, "", password);
         }
     }
 
     private void uploadImageAndRegister(String name, String email, String phone,
-            String nid, String password) {
+            String address, String nid, String password) {
         // Upload to Cloudinary
         com.example.fixmyarea.utils.CloudinaryUploader.uploadImage(this, selectedImageUri, "profile_images",
                 new com.example.fixmyarea.utils.CloudinaryUploader.UploadCallback() {
@@ -139,7 +142,7 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onSuccess(String imageUrl) {
                         runOnUiThread(() -> {
                             Log.d(TAG, "Image uploaded to Cloudinary: " + imageUrl);
-                            createUserAccount(name, email, phone, nid, imageUrl, password);
+                            createUserAccount(name, email, phone, address, nid, imageUrl, password);
                         });
                     }
 
@@ -150,7 +153,7 @@ public class RegisterActivity extends AppCompatActivity {
                             Toast.makeText(RegisterActivity.this,
                                     "Image upload failed: " + error, Toast.LENGTH_LONG).show();
                             // Continue without image
-                            createUserAccount(name, email, phone, nid, "", password);
+                            createUserAccount(name, email, phone, address, nid, "", password);
                         });
                     }
 
@@ -164,7 +167,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void createUserAccount(String name, String email, String phone,
-            String nid, String profileImageUrl, String password) {
+            String address, String nid, String profileImageUrl, String password) {
         // Create user account
         firebaseManager.signUpWithEmail(email, password)
                 .addOnCompleteListener(this, task -> {
@@ -177,6 +180,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 name,
                                 email,
                                 phone,
+                                address,
                                 nid,
                                 profileImageUrl).addOnSuccessListener(aVoid -> {
                                     // Save session to DataStore
@@ -201,7 +205,7 @@ public class RegisterActivity extends AppCompatActivity {
                 });
     }
 
-    private boolean validateInputs(String name, String email, String phone, String nid,
+    private boolean validateInputs(String name, String email, String phone, String address, String nid,
             String password, String confirmPassword) {
         // Validate name
         if (TextUtils.isEmpty(name)) {
@@ -239,6 +243,19 @@ public class RegisterActivity extends AppCompatActivity {
         if (phone.length() < 10) {
             phoneInput.setError("Please enter a valid phone number");
             phoneInput.requestFocus();
+            return false;
+        }
+
+        // Validate address
+        if (TextUtils.isEmpty(address)) {
+            addressInput.setError("Address is required");
+            addressInput.requestFocus();
+            return false;
+        }
+
+        if (address.length() < 5) {
+            addressInput.setError("Please enter a valid address");
+            addressInput.requestFocus();
             return false;
         }
 
@@ -291,6 +308,7 @@ public class RegisterActivity extends AppCompatActivity {
         nameInput.setEnabled(!show);
         emailInput.setEnabled(!show);
         phoneInput.setEnabled(!show);
+        addressInput.setEnabled(!show);
         nidInput.setEnabled(!show);
         passwordInput.setEnabled(!show);
         confirmPasswordInput.setEnabled(!show);

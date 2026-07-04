@@ -193,27 +193,53 @@ public class ManageIssuesActivity extends AppCompatActivity implements AdminIssu
         new AlertDialog.Builder(this)
                 .setTitle(title)
                 .setMessage("Are you sure you want to " + action + " this issue report?")
-                .setPositiveButton("Confirm", (dialog, which) -> updateIssueStatus(issue.getPostId(), newStatus))
+                .setPositiveButton("Confirm", (dialog, which) -> updateIssueStatus(issue, newStatus))
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private void updateIssueStatus(String issueId, String newStatus) {
+    private void updateIssueStatus(Post issue, String newStatus) {
         progressBar.setVisibility(View.VISIBLE);
 
-        firebaseManager.updateIssueStatus(issueId, newStatus).addOnCompleteListener(task -> {
+        firebaseManager.updateIssueStatus(issue.getPostId(), newStatus).addOnCompleteListener(task -> {
             progressBar.setVisibility(View.GONE);
 
             if (task.isSuccessful()) {
-                String message = newStatus.equals(FirebaseConstants.STATUS_APPROVED)
-                        ? "Issue approved successfully"
-                        : "Issue rejected successfully";
+                String statusLabel = formatStatusLabel(newStatus);
+                String message = "Issue " + statusLabel.toLowerCase() + " successfully";
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                sendStatusNotification(issue, statusLabel);
                 loadIssues();
             } else {
                 Toast.makeText(this, "Failed to update issue status", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void sendStatusNotification(Post issue, String statusLabel) {
+        if (issue.getReporterId() == null || issue.getReporterId().isEmpty()) {
+            return;
+        }
+
+        String title = issue.getTitle() != null ? issue.getTitle() : "your issue";
+        String message = "Your issue \"" + title + "\" was marked as " + statusLabel.toLowerCase() + ".";
+        firebaseManager.createNotification(issue.getReporterId(), issue.getPostId(), message);
+    }
+
+    private String formatStatusLabel(String status) {
+        if (FirebaseConstants.STATUS_APPROVED.equals(status)) {
+            return "Approved";
+        }
+        if (FirebaseConstants.STATUS_REJECTED.equals(status)) {
+            return "Rejected";
+        }
+        if (FirebaseConstants.STATUS_RESOLVED.equals(status)) {
+            return "Resolved";
+        }
+        if (FirebaseConstants.STATUS_IN_PROGRESS.equals(status)) {
+            return "In Progress";
+        }
+        return status;
     }
 
     @Override

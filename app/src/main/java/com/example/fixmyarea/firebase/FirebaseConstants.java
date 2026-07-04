@@ -10,12 +10,14 @@ public class FirebaseConstants {
     public static final String COLLECTION_ISSUES = "issues";
     public static final String COLLECTION_COMMENTS = "comments";
     public static final String COLLECTION_AREAS = "areas";
+    public static final String COLLECTION_NOTIFICATIONS = "notifications";
 
     // Firestore Field Names - Users
     public static final String FIELD_USER_ID = "userId";
     public static final String FIELD_USER_NAME = "userName";
     public static final String FIELD_USER_EMAIL = "email";
     public static final String FIELD_USER_PHONE = "phone";
+    public static final String FIELD_USER_ADDRESS = "address";
     public static final String FIELD_USER_NID = "nid"; // National ID / Student ID
     public static final String FIELD_USER_PROFILE_IMAGE = "profileImageUrl"; // Profile image URL
     public static final String FIELD_USER_ROLE = "role"; // User role (admin/user)
@@ -38,6 +40,13 @@ public class FirebaseConstants {
     public static final String FIELD_ISSUE_REPORTER_ID = "reporterId";
     public static final String FIELD_ISSUE_TIMESTAMP = "timestamp";
     public static final String FIELD_ISSUE_UPVOTES = "upvotes";
+
+    // Firestore Field Names - Notifications
+    public static final String FIELD_NOTIFICATION_USER_ID = "userId";
+    public static final String FIELD_NOTIFICATION_MESSAGE = "message";
+    public static final String FIELD_NOTIFICATION_POST_ID = "postId";
+    public static final String FIELD_NOTIFICATION_TIMESTAMP = "timestamp";
+    public static final String FIELD_NOTIFICATION_IS_READ = "isRead";
 
     // Storage Paths
     public static final String STORAGE_ISSUE_IMAGES = "issue_images/";

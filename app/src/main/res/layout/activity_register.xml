@@ -191,6 +191,33 @@
                             android:textSize="15sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Address Input -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        app:boxBackgroundMode="outline"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:startIconDrawable="@android:drawable/ic_dialog_map"
+                        app:startIconTint="@color/accent"
+                        app:boxStrokeColor="@color/accent"
+                        app:hintTextColor="@color/accent"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/addressInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Address"
+                            android:inputType="textPostalAddress|textMultiLine"
+                            android:minLines="1"
+                            android:maxLines="3"
+                            android:textSize="15sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
                     <!-- NID Input -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"

@@ -41,6 +41,7 @@ public class ProfileActivity extends AppCompatActivity {
     private EditText nameInput;
     private EditText emailInput;
     private EditText phoneInput;
+    private EditText addressInput;
     private EditText nidInput;
     private Button saveButton;
     private Button logoutButton;
@@ -79,6 +80,7 @@ public class ProfileActivity extends AppCompatActivity {
         nameInput = findViewById(R.id.nameInput);
         emailInput = findViewById(R.id.emailInput);
         phoneInput = findViewById(R.id.phoneInput);
+        addressInput = findViewById(R.id.addressInput);
         nidInput = findViewById(R.id.nidInput);
         saveButton = findViewById(R.id.saveButton);
         logoutButton = findViewById(R.id.logoutButton);
@@ -113,6 +115,7 @@ public class ProfileActivity extends AppCompatActivity {
                             String name = documentSnapshot.getString(FirebaseConstants.FIELD_USER_NAME);
                             String email = documentSnapshot.getString(FirebaseConstants.FIELD_USER_EMAIL);
                             String phone = documentSnapshot.getString(FirebaseConstants.FIELD_USER_PHONE);
+                            String address = documentSnapshot.getString(FirebaseConstants.FIELD_USER_ADDRESS);
                             String nid = documentSnapshot.getString(FirebaseConstants.FIELD_USER_NID);
                             currentProfileImageUrl = documentSnapshot.getString(
                                     FirebaseConstants.FIELD_USER_PROFILE_IMAGE);
@@ -121,6 +124,7 @@ public class ProfileActivity extends AppCompatActivity {
                             nameInput.setText(name);
                             emailInput.setText(email);
                             phoneInput.setText(phone);
+                            addressInput.setText(address);
                             nidInput.setText(nid);
 
                             // Load profile image
@@ -185,10 +189,11 @@ public class ProfileActivity extends AppCompatActivity {
         // Get input values
         String name = nameInput.getText().toString().trim();
         String phone = phoneInput.getText().toString().trim();
+        String address = addressInput.getText().toString().trim();
         String nid = nidInput.getText().toString().trim();
 
         // Validate inputs
-        if (!validateInputs(name, phone, nid)) {
+        if (!validateInputs(name, phone, address, nid)) {
             return;
         }
 
@@ -197,14 +202,14 @@ public class ProfileActivity extends AppCompatActivity {
         // Check if image was changed
         if (selectedImageUri != null) {
             // Upload new image first
-            uploadImageAndSave(name, phone, nid);
+            uploadImageAndSave(name, phone, address, nid);
         } else {
             // Save without changing image
-            updateUserProfile(name, phone, nid, currentProfileImageUrl);
+            updateUserProfile(name, phone, address, nid, currentProfileImageUrl);
         }
     }
 
-    private void uploadImageAndSave(String name, String phone, String nid) {
+    private void uploadImageAndSave(String name, String phone, String address, String nid) {
         // Upload to Cloudinary
         com.example.fixmyarea.utils.CloudinaryUploader.uploadImage(this, selectedImageUri, "profile_images",
                 new com.example.fixmyarea.utils.CloudinaryUploader.UploadCallback() {
@@ -213,7 +218,7 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onSuccess(String imageUrl) {
                         runOnUiThread(() -> {
                             Log.d(TAG, "Image uploaded to Cloudinary: " + imageUrl);
-                            updateUserProfile(name, phone, nid, imageUrl);
+                            updateUserProfile(name, phone, address, nid, imageUrl);
                         });
                     }
 
@@ -224,7 +229,7 @@ public class ProfileActivity extends AppCompatActivity {
                             Toast.makeText(ProfileActivity.this,
                                     "Image upload failed: " + error, Toast.LENGTH_LONG).show();
                             // Continue with old image
-                            updateUserProfile(name, phone, nid, currentProfileImageUrl);
+                            updateUserProfile(name, phone, address, nid, currentProfileImageUrl);
                         });
                     }
 
@@ -237,11 +242,12 @@ public class ProfileActivity extends AppCompatActivity {
                 });
     }
 
-    private void updateUserProfile(String name, String phone, String nid, String profileImageUrl) {
+    private void updateUserProfile(String name, String phone, String address, String nid, String profileImageUrl) {
         // Create update map
         Map<String, Object> updates = new HashMap<>();
         updates.put(FirebaseConstants.FIELD_USER_NAME, name);
         updates.put(FirebaseConstants.FIELD_USER_PHONE, phone);
+        updates.put(FirebaseConstants.FIELD_USER_ADDRESS, address);
         updates.put(FirebaseConstants.FIELD_USER_NID, nid);
         updates.put(FirebaseConstants.FIELD_USER_PROFILE_IMAGE, profileImageUrl);
 
@@ -266,7 +272,7 @@ public class ProfileActivity extends AppCompatActivity {
                 });
     }
 
-    private boolean validateInputs(String name, String phone, String nid) {
+    private boolean validateInputs(String name, String phone, String address, String nid) {
         // Validate name
         if (TextUtils.isEmpty(name)) {
             nameInput.setError("Name is required");
@@ -293,6 +299,19 @@ public class ProfileActivity extends AppCompatActivity {
             return false;
         }
 
+        // Validate address
+        if (TextUtils.isEmpty(address)) {
+            addressInput.setError("Address is required");
+            addressInput.requestFocus();
+            return false;
+        }
+
+        if (address.length() < 5) {
+            addressInput.setError("Please enter a valid address");
+            addressInput.requestFocus();
+            return false;
+        }
+
         // Validate NID
         if (TextUtils.isEmpty(nid)) {
             nidInput.setError("NID/Student ID is required");
@@ -315,6 +334,7 @@ public class ProfileActivity extends AppCompatActivity {
         editImageButton.setEnabled(!show);
         nameInput.setEnabled(!show);
         phoneInput.setEnabled(!show);
+        addressInput.setEnabled(!show);
         nidInput.setEnabled(!show);
     }
     private void logout() {

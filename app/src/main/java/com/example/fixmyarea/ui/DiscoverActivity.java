@@ -344,14 +344,7 @@ public class DiscoverActivity extends AppCompatActivity {
     }
 
     private void sendNotification(String toUserId, String postId, String message) {
-        Map<String, Object> notification = new HashMap<>();
-        notification.put("userId", toUserId);
-        notification.put("message", message);
-        notification.put("postId", postId);
-        notification.put("timestamp", System.currentTimeMillis());
-        notification.put("isRead", false);
-
-        firebaseManager.getFirestore().collection("notifications").add(notification);
+        firebaseManager.createNotification(toUserId, postId, message);
     }
 
     @Override

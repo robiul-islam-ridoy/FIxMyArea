@@ -8,6 +8,7 @@ public class User {
     private String userName;
     private String email;
     private String phone;
+    private String address;
     private String nid;
     private String profileImageUrl;
     private String role; // "admin" or "user"
@@ -17,12 +18,13 @@ public class User {
     public User() {
     }
 
-    public User(String userId, String userName, String email, String phone,
+    public User(String userId, String userName, String email, String phone, String address,
             String nid, String profileImageUrl, String role, long createdAt) {
         this.userId = userId;
         this.userName = userName;
         this.email = email;
         this.phone = phone;
+        this.address = address;
         this.nid = nid;
         this.profileImageUrl = profileImageUrl;
         this.role = role;
@@ -60,6 +62,14 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getNid() {

@@ -97,10 +97,12 @@ public class PostDetailActivity extends AppCompatActivity {
     }
 
     private void loadPostData() {
-        // Check if we only have postId (from admin dashboard)
-        String postId = getIntent().getStringExtra("postId");
+        // Load from Firestore when callers only pass an issue id.
+        String postId = getIntent().getStringExtra(EXTRA_POST_ID);
+        if (postId == null || postId.isEmpty()) {
+            postId = getIntent().getStringExtra("postId");
+        }
         if (postId != null && !getIntent().hasExtra(EXTRA_POST_TITLE)) {
-            // Load from Firestore
             loadPostFromFirestore(postId);
             return;
         }

@@ -182,12 +182,13 @@ public class FirebaseManager {
      * Create a user profile in Firestore after registration
      */
     public Task<Void> createUserProfile(String userId, String name, String email, String phone,
-            String nid, String profileImageUrl) {
+            String address, String nid, String profileImageUrl) {
         Map<String, Object> userProfile = new HashMap<>();
         userProfile.put(FirebaseConstants.FIELD_USER_ID, userId);
         userProfile.put(FirebaseConstants.FIELD_USER_NAME, name);
         userProfile.put(FirebaseConstants.FIELD_USER_EMAIL, email);
         userProfile.put(FirebaseConstants.FIELD_USER_PHONE, phone);
+        userProfile.put(FirebaseConstants.FIELD_USER_ADDRESS, address);
         userProfile.put(FirebaseConstants.FIELD_USER_NID, nid);
         userProfile.put(FirebaseConstants.FIELD_USER_PROFILE_IMAGE, profileImageUrl);
         userProfile.put(FirebaseConstants.FIELD_USER_ROLE, FirebaseConstants.ROLE_USER); // Default role
@@ -219,6 +220,21 @@ public class FirebaseManager {
         issue.put(FirebaseConstants.FIELD_ISSUE_UPVOTES, 0);
 
         return addDocumentAutoId(FirebaseConstants.COLLECTION_ISSUES, issue);
+    }
+
+    /**
+     * Create a notification for a user.
+     */
+    public Task<com.google.firebase.firestore.DocumentReference> createNotification(
+            String userId, String postId, String message) {
+        Map<String, Object> notification = new HashMap<>();
+        notification.put(FirebaseConstants.FIELD_NOTIFICATION_USER_ID, userId);
+        notification.put(FirebaseConstants.FIELD_NOTIFICATION_MESSAGE, message);
+        notification.put(FirebaseConstants.FIELD_NOTIFICATION_POST_ID, postId);
+        notification.put(FirebaseConstants.FIELD_NOTIFICATION_TIMESTAMP, System.currentTimeMillis());
+        notification.put(FirebaseConstants.FIELD_NOTIFICATION_IS_READ, false);
+
+        return addDocumentAutoId(FirebaseConstants.COLLECTION_NOTIFICATIONS, notification);
     }
 
     /**

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fixmyarea.R;
 import com.example.fixmyarea.adapters.NotificationAdapter;
+import com.example.fixmyarea.firebase.FirebaseConstants;
 import com.example.fixmyarea.firebase.FirebaseManager;
 import com.example.fixmyarea.models.Notification;
 import com.example.fixmyarea.utils.BottomNavHelper;
@@ -55,9 +56,13 @@ public class NotificationsActivity extends AppCompatActivity {
         adapter = new NotificationAdapter(notification -> {
             // Mark as read
             if (!notification.isRead()) {
-                firebaseManager.getFirestore().collection("notifications")
+                firebaseManager.getFirestore().collection(FirebaseConstants.COLLECTION_NOTIFICATIONS)
                         .document(notification.getId())
-                        .update("isRead", true);
+                        .update(FirebaseConstants.FIELD_NOTIFICATION_IS_READ, true)
+                        .addOnSuccessListener(aVoid -> {
+                            notification.setRead(true);
+                            adapter.notifyDataSetChanged();
+                        });
             }
 
             // Open the post details if postId exists
@@ -92,18 +97,14 @@ public class NotificationsActivity extends AppCompatActivity {
 
         progressBar.setVisibility(View.VISIBLE);
 
-        firebaseManager.getFirestore().collection("notifications")
-                .whereEqualTo("userId", user.getUid())
+        firebaseManager.getFirestore().collection(FirebaseConstants.COLLECTION_NOTIFICATIONS)
+                .whereEqualTo(FirebaseConstants.FIELD_NOTIFICATION_USER_ID, user.getUid())
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     progressBar.setVisibility(View.GONE);
                     List<Notification> notifications = new ArrayList<>();
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        Notification n = doc.toObject(Notification.class);
-                        if (n != null) {
-                            n.setId(doc.getId());
-                            notifications.add(n);
-                        }
+                        notifications.add(mapNotification(doc));
                     }
 
                     if (notifications.isEmpty()) {
@@ -124,6 +125,22 @@ public class NotificationsActivity extends AppCompatActivity {
                     notificationsRecyclerView.setVisibility(View.GONE);
                     Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private Notification mapNotification(DocumentSnapshot doc) {
+        Notification notification = new Notification();
+        notification.setId(doc.getId());
+        notification.setUserId(doc.getString(FirebaseConstants.FIELD_NOTIFICATION_USER_ID));
+        notification.setMessage(doc.getString(FirebaseConstants.FIELD_NOTIFICATION_MESSAGE));
+        notification.setPostId(doc.getString(FirebaseConstants.FIELD_NOTIFICATION_POST_ID));
+
+        Long timestamp = doc.getLong(FirebaseConstants.FIELD_NOTIFICATION_TIMESTAMP);
+        notification.setTimestamp(timestamp != null ? timestamp : 0L);
+
+        Boolean isRead = doc.getBoolean(FirebaseConstants.FIELD_NOTIFICATION_IS_READ);
+        notification.setRead(Boolean.TRUE.equals(isRead));
+
+        return notification;
     }
 
 }
